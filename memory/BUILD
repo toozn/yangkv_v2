@@ -3,14 +3,14 @@ cc_library(
     name = "message_queue",
     srcs = ["message_queue.cpp"],
     hdrs = ["message_queue.h"],
-    deps = ["://utils:slice",],
+    deps = ["//utils:dbformat",],
     visibility = ["//main:__pkg__"],
 )
 
 cc_library(
 	name = "skiplist",
     srcs = ["skiplist.h"],
-    deps = [":message",
+    deps = ["//utils:dbformat",
     		"//utils:status",
     		],
     visibility = ["//main:__pkg__"],

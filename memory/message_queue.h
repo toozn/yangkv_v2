@@ -1,6 +1,8 @@
-#include "dbformat.h"
+#include "utils/dbformat.h"
+#include <mutex>
 #pragma once
-using namespace std;
+
+namespace leveldb {
 
 class MessageQueue {
 public:
@@ -16,5 +18,7 @@ private:
 	static const int kQueueSize = 20;
 	MemEntry queue_[kQueueSize];
 	unsigned long long w_ptr, r_ptr;
-	mutex lock_;
+	std::mutex lock_;
 };
+
+}

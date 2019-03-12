@@ -1,6 +1,7 @@
 cc_library(
     name = "slice",
     hdrs = ["slice.h"],
+    deps = [":status",],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
 
@@ -10,6 +11,17 @@ cc_library(
     deps = [":slice",],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
+
+cc_library(
+    name = "dbformat",
+    srcs = ["dbformat.cpp"],
+    hdrs = ["dbformat.h"],
+    deps = [":slice",
+            ":env",
+            "coding"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+)
+
 
 cc_library(
     name = "bloomfilter",
@@ -34,7 +46,6 @@ cc_library(
 
 cc_library(
     name = "env",
-    srcs = ["env.cpp"],
     hdrs = ["env.h"],
     visibility = ["//main:__pkg__"],
 )

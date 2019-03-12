@@ -1,6 +1,8 @@
-#include "message.h"
+#include "utils/dbformat.h"
 #include "utils/status.h"
 #pragma once
+
+namespace leveldb {
 
 class SkipList {
 public:
@@ -16,7 +18,7 @@ public:
         EncodeMemEntry(entry, s);
         list_[entry.key.ToString()] = s;
     }
-    Status get(std::string key, Slice value) {
+    Status get(std::string key, Slice& value) {
         if (list_.count(key) == 0) {
             return Status::NotFound();
         }
@@ -33,3 +35,5 @@ private:
     unsigned long long id_;
     map<std::string, Slice>list_;
 };
+
+}

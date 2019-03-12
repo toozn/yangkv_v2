@@ -2,6 +2,9 @@
 #include "memory/compacter.h"
 #include "versionedit.h"
 #pragma once
+
+namespace leveldb {
+
 class VersionSet;
 class yangkvMain;
 
@@ -13,7 +16,7 @@ public:
     }
     void ref();
     void unref();
-    Status Get(Message& key);
+    bool Get(std::string& key, uint64_t seq, std::string* value, Status* s);
     Status apply(Version* curr, VersionEdit* edit);
     Version* nxt_;
     Version* pre_;
@@ -42,3 +45,5 @@ private:
     yangkvMain* db_;
 private:
 };
+
+}

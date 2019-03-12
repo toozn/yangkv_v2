@@ -1,4 +1,8 @@
 #include <bits/stdc++.h>
 #pragma once
-using namespace std;
-unsigned long long strHash(const string&, const int seed);
+
+namespace leveldb {
+
+uint64_t strHash(const std::string&, const int seed);
+
+}

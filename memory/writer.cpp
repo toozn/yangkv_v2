@@ -1,6 +1,8 @@
 #include "writer.h"
 #include "compacter.h"
 
+namespace leveldb {
+
 class compacter;
 
 Writer::Writer(Compacter* compacter) {
@@ -31,7 +33,7 @@ void Writer::mayInsertMessage() {
     pthread_rwlock_unlock(&rwlock_);
 }
 
-bool Writer::searchMessage(std::string& key, std::string* value, Status* s) {
+bool Writer::getEntry(std::string& key, uint64_t seq, std::string* value, Status* s) {
     pthread_rwlock_rdlock(&rwlock_);
     Slice slice;
     Status ss = list_->get(key, slice);
@@ -41,11 +43,15 @@ bool Writer::searchMessage(std::string& key, std::string* value, Status* s) {
     }
     MemEntry entry;
     DecodeMemEntry(slice, entry);
+    if (entry.seq_num > seq) {
+        return false;
+    }
     if (entry.value_type == kDeleted) {
-        s = Status::NotFound();
+        *s = Status::NotFound();
         return true;
     }
     else {
+        *s = Status::OK();
         value->assign(entry.value.data(), entry.value.size());
     }
     return true;
@@ -60,4 +66,6 @@ void* workRound(void* arg_) {
     }
     printf("Writer Quit!\n");
     return 0;
+}
+
 }

@@ -2,7 +2,9 @@
 #include "utils/config.h"
 #include "skiplist.h"
 #pragma once
-using namespace std;
+
+
+namespace leveldb {
 
 class yangkvMain;
 
@@ -25,3 +27,5 @@ private:
     int list_idx;
     pthread_mutex_t lock_;
 };
+
+}

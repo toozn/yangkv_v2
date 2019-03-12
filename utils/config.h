@@ -2,6 +2,8 @@
 #pragma once
 using namespace std;
 
+namespace leveldb {
+
 class Compacter;
 class Writer;
 
@@ -34,3 +36,5 @@ public:
     Compacter* instance;
     bool stopFLAG;
 };
+
+}

@@ -1,5 +1,8 @@
 #include "compacter.h"
 #include <unistd.h>
+
+namespace leveldb {
+
 void* Compacter::compactRound(void* arg_) {
     auto arg = (CompacterConfig*)arg_;
     while (arg->stopFLAG == false) {
@@ -25,4 +28,6 @@ void Compacter::CompactList() {
    int sz = list_[list_idx].size();
    list_[list_idx].clear();
    //set_->CreateNewVersion();
+}
+
 }

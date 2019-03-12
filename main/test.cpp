@@ -1,13 +1,16 @@
 #include "singleton.h"
 #include <unistd.h>
 
+using namespace leveldb;
+using namespace std;
+
 map<string, string>mp;
 void* reader(void* arg) {
     auto db = Singleton::get();
     for (int i = 0; i <= 10000; i++) {
         string key = to_string(i);
         string value;
-        Status s = db->getValue(key, value);
+        Status s = db->getValue(key, &value);
         if (i % 2 == 0 && !s.isNotFound()) {
             printf("Error! %d\n", i);
         }
@@ -15,6 +18,7 @@ void* reader(void* arg) {
             printf("Error! %s %s\n", value.c_str(), mp[key].c_str());
         }
    } 
+   return nullptr;
 }
 
 int main() {

@@ -1,5 +1,8 @@
 #include "yangkvMain.h"
 #pragma once
+
+namespace leveldb {
+
 class YangkvMain;
 
 class Singleton {
@@ -28,3 +31,5 @@ private:
     static YangkvMain* _instance;    ///< The singleton instance
 
 };
+
+}

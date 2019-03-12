@@ -1,7 +1,11 @@
 #include "utils/env.h"
 #include "utils/hash_helper.h"
 #include "utils/status.h"
+#include "utils/config.h"
+#include <atomic>
 #pragma once
+
+namespace leveldb {
 
 class Writer;
 class Compacter;
@@ -12,9 +16,9 @@ public:
 	YangkvMain();
 	~YangkvMain();
     void init();
-	Status setKey(const string&, const string&, bool flag = 0);
-	Status delKey(const string&);
-	Status getValue(const string&, string&);
+	Status setKey(std::string& key, std::string& value, bool flag = 0);
+	Status delKey(std::string& key);
+	Status getValue(std::string&, std::string*);
 	Writer* getWriter(int);
     void stop();
 
@@ -22,7 +26,7 @@ private:
 	friend class Compacter;
 	friend class Writer;
 	friend class VersionSet;
-	unsigned long long idx_;
+	std::atomic <uint64_t> idx_;
 	Env* env_;
     static const int kMaxWriter = 4;
     static const int kSeedForWriter = 37;
@@ -33,3 +37,5 @@ private:
 };
 
 void* workerRound(void*);
+
+}

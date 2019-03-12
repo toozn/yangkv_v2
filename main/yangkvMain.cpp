@@ -2,6 +2,9 @@
 #include "memory/writer.h"
 #include "versionset.h"
 #include <unistd.h>
+
+namespace leveldb {
+
 void* writerRound(void* arg_) {
     pthread_detach(pthread_self());
     auto arg = (WriterConfig*) arg_;
@@ -28,8 +31,8 @@ void YangkvMain::init() {
     sleep(1);
 }
 
-Status YangkvMain::setKey(const string& key, const string& value, bool del_flag) {
-	auto id = idx_++;
+Status YangkvMain::setKey(std::string& key, std::string& value, bool del_flag) {
+	uint64_t id = idx_++;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
     auto queue = writer_[writerID]->queue_;
     assert(queue != nullptr);
@@ -38,25 +41,26 @@ Status YangkvMain::setKey(const string& key, const string& value, bool del_flag)
     return Status::OK();
 }
 
-Status YangkvMain::delKey(const string& key) {
-	Status s = setKey(key, "", true);
-    return Status::OK();
+Status YangkvMain::delKey(std::string& key) {
+	return setKey(key, NullStr, true);
 }
 
-Status YangkvMain::getValue(const string& key, string* value) {
-    auto id = idx_;
+Status YangkvMain::getValue(std::string& key, std::string* value) {
+    uint64_t id = idx_;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
     Status s;
-    bool result = writer_[writerID]->queue_->search(key, id, value, s);
+    bool result = writer_[writerID]->queue_->search(key, id, value, &s);
     if (result) {
         return s;
     }
     //printf("%s %d\n", key.c_str(), __LINE__);
-    result = writer_[writerID]->searchMessage(key, value, id);
+    result = writer_[writerID]->getEntry(key, id, value, &s);
     if (result) {
         return s;
     }
-    assert(false);
+    else {
+        return Status::NotFound();
+    }
 }
 
 
@@ -66,3 +70,4 @@ void YangkvMain::stop() {
     }
 }
 
+}

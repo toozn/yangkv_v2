@@ -11,7 +11,7 @@ public:
     Writer(){}
     Writer(Compacter*);
     ~Writer();
-	bool searchMessage(Lookupkey& key, std::string* value, Status* s);
+	bool getEntry(std::string& key, uint64_t seq, std::string* value, Status* s);
 	void mayInsertMessage();
 	MessageQueue* queue_;
 private:

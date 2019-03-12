@@ -1,5 +1,8 @@
 #include <string>
 #pragma once
+
+namespace leveldb {
+
 class VersionSet;
 struct FileMetaData {
     int refs;
@@ -17,3 +20,5 @@ public:
 private:
     VersionSet* set_;
 };
+
+}
