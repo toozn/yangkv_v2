@@ -16,9 +16,8 @@ cc_library(
     name = "dbformat",
     srcs = ["dbformat.cpp"],
     hdrs = ["dbformat.h"],
-    deps = [":slice",
-            ":env",
-            "coding"],
+    deps = [":env",
+            ":coding",],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
 

@@ -5,6 +5,8 @@
 
 namespace leveldb {
 
+std::string NullStr = "";
+
 void* writerRound(void* arg_) {
     pthread_detach(pthread_self());
     auto arg = (WriterConfig*) arg_;

@@ -20,6 +20,7 @@ cc_library(
     srcs = ["writer.cpp"],
     hdrs = ["writer.h"],
     deps = [ "//utils:config", 
+             "//utils:dbformat", 
             "compacter",
             ],
     visibility = ["//main:__pkg__"],

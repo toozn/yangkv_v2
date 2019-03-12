@@ -1,4 +1,5 @@
 #include "utils/config.h"
+#include "utils/dbformat.h"
 #include "skiplist.h"
 #include "message_queue.h"
 #pragma once
