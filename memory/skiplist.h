@@ -1,5 +1,6 @@
 #include "utils/dbformat.h"
 #include "utils/status.h"
+#include <map>
 #pragma once
 
 namespace leveldb {
@@ -7,9 +8,20 @@ namespace leveldb {
 class SkipList {
 public:
     SkipList(){
+        ref_ = 1;
         id_ = 0;
         list_.clear();
     };
+    void ref() {
+        ref_++;
+    }
+    void unref() {
+        assert(ref_ >= 1);
+        ref_--;
+        if (ref_ == 0) {
+            delete this;
+        }
+    }
     void insert(MemEntry entry) {
         if (list_.size() == 0) {
             id_ = entry.seq_num;
@@ -33,7 +45,8 @@ public:
     }
 private:
     unsigned long long id_;
-    map<std::string, Slice>list_;
+    std::map<std::string, Slice>list_;
+    int ref_;
 };
 
 }

@@ -2,6 +2,7 @@
 #include "memory/writer.h"
 #include "versionset.h"
 #include <unistd.h>
+#include <iostream>
 
 namespace leveldb {
 
@@ -36,10 +37,12 @@ void YangkvMain::init() {
 Status YangkvMain::setKey(std::string& key, std::string& value, bool del_flag) {
 	uint64_t id = idx_++;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
-    auto queue = writer_[writerID]->queue_;
+    auto queue = &writer_[writerID]->queue_;
     assert(queue != nullptr);
     MemEntry entry = MemEntry(key, value, id, del_flag);
+    //entry.debug();
 	queue->push(entry);
+
     return Status::OK();
 }
 
@@ -51,7 +54,7 @@ Status YangkvMain::getValue(std::string& key, std::string* value) {
     uint64_t id = idx_;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
     Status s;
-    bool result = writer_[writerID]->queue_->search(key, id, value, &s);
+    bool result = writer_[writerID]->queue_.search(key, id, value, &s);
     if (result) {
         return s;
     }

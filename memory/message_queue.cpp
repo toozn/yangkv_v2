@@ -1,6 +1,7 @@
 #include "message_queue.h"
 #include <unistd.h>
-
+#include <iostream>
+using namespace std;
 namespace leveldb {
 
 MessageQueue::MessageQueue() {
@@ -11,11 +12,11 @@ MessageQueue::MessageQueue() {
 MessageQueue::~MessageQueue() {
 }
 
-void MessageQueue::push(MemEntry msg) {
+void MessageQueue::push(MemEntry entry) {
 	std::lock_guard<std::mutex> lock(lock_);
-    //msg->Debug();
-	while(w_ptr - r_ptr >= kQueueSize) usleep(5);
-	queue_[w_ptr % kQueueSize] = msg;
+    while(isFull()) usleep(5);
+	queue_[w_ptr % kQueueSize] = entry;
+    //debug();
 	w_ptr++;
 }
 
@@ -26,7 +27,7 @@ void MessageQueue::pop() {
 
 MemEntry MessageQueue::getFront() {
     assert(w_ptr > r_ptr);
-    return queue_[r_ptr % kQueueSize];
+    return queue_[(r_ptr % kQueueSize)];
 }
 
 bool MessageQueue::isFull() {
@@ -41,7 +42,7 @@ bool MessageQueue::search(std::string& key, uint64_t seq, std::string* value, St
     uint64_t begin = w_ptr - 1;
     uint64_t end = r_ptr;
     for (uint64_t i = begin; i >= end; i--) {
-        MemEntry entry = queue_[i % kQueueSize];
+        MemEntry entry = queue_[(i % kQueueSize)];
         if (key == entry.key.ToString() && seq <= entry.seq_num) {
             if (entry.value_type == kDeleted) {
                 *s = Status::NotFound();
@@ -54,6 +55,17 @@ bool MessageQueue::search(std::string& key, uint64_t seq, std::string* value, St
         }
     }
     return false;
+}
+
+void MessageQueue::debug() {
+    uint64_t begin = w_ptr;
+    uint64_t end = r_ptr;
+    assert(end <= kQueueSize + begin);
+    for (uint64_t i = begin; i >= end; i--) {
+        MemEntry entry = queue_[(i % kQueueSize)];
+        entry.debug();
+    }
+    puts("-----------------------------");
 }
 
 }

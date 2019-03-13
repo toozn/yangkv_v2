@@ -1,6 +1,9 @@
 #include "memory/writer.h"
 #include "memory/compacter.h"
 #include "versionedit.h"
+#include <set>
+#include <vector>
+
 #pragma once
 
 namespace leveldb {
@@ -10,12 +13,13 @@ class yangkvMain;
 
 class Version{
 public:
-    Version(){}
+    Version(){ ref_ = 1; }
     Version(VersionSet* set) {
         set_ = set;
+        ref_ = 1;
     }
-    void ref();
-    void unref();
+    void Ref();
+    void Unref();
     bool Get(std::string& key, uint64_t seq, std::string* value, Status* s);
     Status apply(Version* curr, VersionEdit* edit);
     Version* nxt_;
@@ -25,7 +29,7 @@ private:
     friend class VersionEdit;
     VersionSet* set_;
     int ref_;
-    vector<SkipList*>maintainList_[kMaxWriter];
+    vector<SkipList*>list_[kMaxWriter];
     vector<FileMetaData*>files_[kMaxLevel];
 };
 
@@ -35,8 +39,7 @@ public:
         dummyVersion_ = Version();
         current_ = &dummyVersion_;
     }
-    void addVersion(Version* v);
-    Status applyEdit(VersionEdit* edit);
+    class Builder;
 private:
     friend class yangkvMain;
     friend class Version;

@@ -1,5 +1,6 @@
 #include "writer.h"
 #include "compacter.h"
+#include <unistd.h>
 
 namespace leveldb {
 
@@ -8,7 +9,6 @@ class compacter;
 Writer::Writer(Compacter* compacter) {
     list_ = new SkipList();
     compacter_ = compacter;
-    queue_ = new MessageQueue();
     pthread_rwlock_init(&rwlock_, NULL);
 }
 
@@ -18,14 +18,13 @@ Writer::~Writer() {
 
 void Writer::mayInsertMessage() {
     pthread_rwlock_wrlock(&rwlock_);
-    while (queue_->isEmpty() == false) {
-        
-        MemEntry entry = queue_->getFront();
+    while (queue_.isEmpty() == false) {
+        MemEntry entry = queue_.getFront();
+        //entry->debug();
         list_->insert(entry);
-        queue_->pop();
-        //printf("Success Insert! KEY:%s VALUE:%s ID:%lld\n", msg->key.c_str(), msg->value.c_str(), msg->id);
+        queue_.pop();
+        //printf("Success Insert! KEY:%s VALUE:%s ID:%d\n", entry.key.data(), entry.value.data(), (int)entry.seq_num);
         if (list_->size() >= kMaxListSize) {
-            cout << "???" << endl;
             compacter_->pushList(list_);
             list_ = new SkipList();
         }
@@ -63,6 +62,7 @@ void* workRound(void* arg_) {
     auto writer = (Writer*)arg->instance;
     while (arg->stopFLAG == false) {
         writer->mayInsertMessage();
+        usleep(10);
     }
     printf("Writer Quit!\n");
     return 0;

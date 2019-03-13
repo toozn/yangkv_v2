@@ -28,8 +28,7 @@ private:
 	friend class VersionSet;
 	std::atomic <uint64_t> idx_;
 	Env* env_;
-    static const int kMaxWriter = 4;
-    static const int kSeedForWriter = 37;
+    
 	Writer* writer_[kMaxWriter];
 	Compacter* compacter_;
     WriterConfig* arg_[kMaxWriter];

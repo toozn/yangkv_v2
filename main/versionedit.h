@@ -1,4 +1,8 @@
 #include <string>
+#include <vector>
+#include <set>
+#include <map>
+#include "memory/skiplist.h"
 #pragma once
 
 namespace leveldb {
@@ -6,19 +10,40 @@ namespace leveldb {
 class VersionSet;
 struct FileMetaData {
     int refs;
-    std::string Lkey;
-    std::string Hkey;
-    int filesize;
-    int filenumber;
+    std::string smallest;
+    std::string largest;
+    int file_size;
+    int number;
+    int allowed_seeks;
     bool mayInFile(std::string& user_key){
-    	return user_key >= Lkey && user_key <= Hkey;
+    	return user_key >= smallest && user_key <= largest;
     }
+    FileMetaData() : refs(0), file_size(0) { }
 };
 class VersionEdit{
 public:
-    void work();    
+    VersionEdit() {clear();}
+    void clear();
 private:
-    VersionSet* set_;
+    friend class VersionSet;
+
+    typedef std::set< std::pair<int, uint64_t> > DeletedFileSet;
+
+    std::string comparator_;
+    uint64_t log_number_;
+    uint64_t prev_log_number_;
+    uint64_t next_file_number_;
+    uint64_t last_sequence_;
+    bool has_comparator_;
+    bool has_log_number_;
+    bool has_prev_log_number_;
+    bool has_next_file_number_;
+    bool has_last_sequence_;
+
+    //sssstd::vector< std::pair<int, InternalKey> > compact_pointers_;
+    DeletedFileSet deleted_files_;
+    std::vector< std::pair<int, FileMetaData> > new_files_;
+    std::vector<SkipList*> deleted_lists_;
 };
 
 }

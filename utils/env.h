@@ -8,7 +8,7 @@ class Env {
 public:
 	Env();
 };
-
+static const int kSeedForWriter = 37;
 static const int kQueueSizeToWriter = 32;
 static const int kQueueSizeToCompacter = 16;
 static const int kMaxWriter = 4;

@@ -9,6 +9,7 @@ cc_library(
     name = "versionedit",
     srcs = ["versionedit.cpp"],
     hdrs = ["versionedit.h"],
+    deps = ["//memory:skiplist",],
 )
 cc_library(
     name = "versionset",
@@ -17,6 +18,7 @@ cc_library(
     deps = [":versionedit",
             "//memory:writer",
             "//memory:compacter",
+            "//utils:hashhelper",
             ],
 )
 cc_library(
@@ -26,7 +28,6 @@ cc_library(
     deps = ["//memory:writer", 
             "//memory:compacter",
             "//utils:env",
-            "//utils:hashhelper",
             ":versionset",
             "//utils:status",
            ],

@@ -14,7 +14,7 @@ public:
     ~Writer();
 	bool getEntry(std::string& key, uint64_t seq, std::string* value, Status* s);
 	void mayInsertMessage();
-	MessageQueue* queue_;
+	MessageQueue queue_;
 private:
     const static int kMaxListSize = 102400;
     Compacter* compacter_;
