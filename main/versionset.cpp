@@ -1,12 +1,14 @@
 #include "versionset.h"
 #include "utils/hash_helper.h"
+#include "memory/compacter.h"
+#include "utils/condlock.h"
+#include <unistd.h>
 namespace leveldb {
-
 void Version::Ref(){
     ref_++;
 }
 void Version::Unref(){
-    assert(this != &set_->dummyVersion_ && ref_);
+    assert(this != &set_->dummy_versions_ && ref_);
     assert(ref_ >= 1);
     ref_--;
     if (ref_ == 0) {
@@ -15,8 +17,8 @@ void Version::Unref(){
                 it->unref();
             }
         }
-        nxt_->pre_ = pre_;
-        pre_->nxt_ = nxt_;
+        next_->prev_ = prev_;
+        prev_->next_ = next_;
         delete this;
     }
 }
@@ -25,27 +27,36 @@ Status Version::apply(Version* curr, VersionEdit* edit) {
     return Status::OK();
 }
 
-bool Version::Get(std::string& key, uint64_t seq, std::string* value, Status* s) {
+void Version::AppendList(SkipList* list, int idx) {
+    pthread_rwlock_wrlock(&rwlock_);
+    list_[idx].push_back(list);
+    pthread_rwlock_unlock(&rwlock_);
+}
+
+bool Version::Get(std::string& key, uint64_t seq, std::string* value) {
     Slice slice;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
-    for (auto list: list_[writerID]) {
+    pthread_rwlock_rdlock(&rwlock_);
+    int sz = list_[writerID].size();
+    for (int i = sz - 1; i >= 0; i--) {
+        SkipList* list = list_[writerID][i];
         Status ss = list->get(key, slice);
         if (ss.ok()) {
+            pthread_rwlock_unlock(&rwlock_);
             MemEntry entry;
             DecodeMemEntry(slice, entry);
             if (entry.value_type == kDeleted) {
-                *s = Status::NotFound();
-                return true;
+                return false;
             }
             else {
-                *s = Status::OK();
                 value->assign(entry.value.data(), entry.value.size());
                 return true;
             }
             
         }
     }
-    vector<FileMetaData*> search_list;
+    pthread_rwlock_unlock(&rwlock_);
+    std::vector<FileMetaData*> search_list;
     for (int lv = 0; lv < kMaxLevel; lv++) {
         for (auto file: files_[lv]) {
             if (file->mayInFile(key)) {
@@ -62,21 +73,30 @@ bool Version::Get(std::string& key, uint64_t seq, std::string* value, Status* s)
     return false;
 }
 
+void Version::Debug() {
+    printf("-----------------------\n");
+    printf("ref: %d\n", ref_);
+    for (int i = 0; i < kMaxWriter; i++) {
+        printf("%d\n", (int)list_[i].size());
+    }
+    printf("-----------------------\n");
+}
+
 class VersionSet::Builder {
- private:
-  // Helper to sort by v->files_[file_number].smallest
-  struct BySmallestKey {
+private:
+    // Helper to sort by v->files_[file_number].smallest
+    struct BySmallestKey {
 
     bool operator()(FileMetaData* f1, FileMetaData* f2) const {
-      int r = f1->smallest < f2->smallest;
-      if (r != 0) {
-        return (r < 0);
-      } else {
-        // Break ties by file number
-        return (f1->number < f2->number);
-      }
+        int r = f1->smallest < f2->smallest;
+        if (r != 0) {
+          return (r < 0);
+        } else {
+          // Break ties by file number
+          return (f1->number < f2->number);
+        }
     }
-  };
+};
 
   typedef std::set<FileMetaData*, BySmallestKey> FileSet;
   struct LevelState {
@@ -101,21 +121,21 @@ class VersionSet::Builder {
 
   ~Builder() {
     for (int level = 0; level < kMaxLevel; level++) {
-      const FileSet* added = levels_[level].added_files;
-      std::vector<FileMetaData*> to_unref;
-      to_unref.reserve(added->size());
-      for (FileSet::const_iterator it = added->begin();
-          it != added->end(); ++it) {
-        to_unref.push_back(*it);
-      }
-      delete added;
-      for (uint32_t i = 0; i < to_unref.size(); i++) {
-        FileMetaData* f = to_unref[i];
-        f->refs--;
-        if (f->refs <= 0) {
-          delete f;
+        const FileSet* added = levels_[level].added_files;
+        std::vector<FileMetaData*> to_unref;
+        to_unref.reserve(added->size());
+        for (FileSet::const_iterator it = added->begin();
+            it != added->end(); ++it) {
+            to_unref.push_back(*it);
         }
-      }
+        delete added;
+        for (uint32_t i = 0; i < to_unref.size(); i++) {
+            FileMetaData* f = to_unref[i];
+            f->refs--;
+            if (f->refs <= 0) {
+              delete f;
+            }
+        }
     }
     base_->Unref();
   }
@@ -186,15 +206,51 @@ class VersionSet::Builder {
     if (levels_[level].deleted_files.count(f->number) > 0) {
       // File is deleted: do nothing
     } else {
-      std::vector<FileMetaData*>* files = &v->files_[level];
-      if (level > 0 && !files->empty()) {
-        // Must not overlap
-        assert((*files)[files->size()-1]->largest < f->smallest);
-      }
-      f->refs++;
-      files->push_back(f);
+        std::vector<FileMetaData*>* files = &v->files_[level];
+        if (level > 0 && !files->empty()) {
+          // Must not overlap
+          assert((*files)[files->size()-1]->largest < f->smallest);
+        }
+        f->refs++;
+        files->push_back(f);
     }
   }
 };
+
+VersionSet::VersionSet(YangkvMain* db, CondLock* lock) {
+    db_ = db;
+    compact_lock_ = lock;
+    dummy_versions_ = Version(this);
+    dummy_versions_.ref_ = 1;
+    dummy_versions_.prev_ = &dummy_versions_;
+    dummy_versions_.next_ = &dummy_versions_;
+    AppendVersion(new Version(this));
+}
+
+void VersionSet::AppendVersion(Version* v) {
+    // Make "v" current
+    assert(v->ref_ == 0);
+    assert(v != current_);
+    if (current_ != nullptr) {
+        current_->Unref();
+    }
+    current_ = v;
+    v->Ref();
+    v->prev_ = dummy_versions_.prev_;
+    v->next_ = &dummy_versions_;
+    v->prev_->next_ = v;
+    v->next_->prev_ = v;
+}
+
+void VersionSet::AppendFrozenList(SkipList* list, int idx) {
+    assert(compact_lock_ != nullptr);
+    assert(current_ != nullptr);
+    compact_lock_->Lock();
+    if (compacter_->inCompact()) {
+        compact_lock_->Wait();
+    }
+    current_->AppendList(list, idx);
+    compact_lock_->Unlock();
+}
 
 }

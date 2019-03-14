@@ -1,5 +1,3 @@
-#include "memory/writer.h"
-#include "memory/compacter.h"
 #include "versionedit.h"
 #include <set>
 #include <vector>
@@ -7,45 +5,51 @@
 #pragma once
 
 namespace leveldb {
-
 class VersionSet;
-class yangkvMain;
+class YangkvMain;
+class CondLock;
 
 class Version{
 public:
-    Version(){ ref_ = 1; }
+    Version(){}
     Version(VersionSet* set) {
         set_ = set;
-        ref_ = 1;
+        ref_ = 0;
+        pthread_rwlock_init(&rwlock_, NULL);
     }
     void Ref();
     void Unref();
-    bool Get(std::string& key, uint64_t seq, std::string* value, Status* s);
+    bool Get(std::string& key, uint64_t seq, std::string* value);
+    void AppendList(SkipList* list, int idx);
+    void Debug();
     Status apply(Version* curr, VersionEdit* edit);
-    Version* nxt_;
-    Version* pre_;
+    Version* next_;
+    Version* prev_;
+    int ref_;
 private:
     friend class VersionSet;
     friend class VersionEdit;
     VersionSet* set_;
-    int ref_;
-    vector<SkipList*>list_[kMaxWriter];
-    vector<FileMetaData*>files_[kMaxLevel];
+    std::vector<SkipList*>list_[kMaxWriter];
+    std::vector<FileMetaData*>files_[kMaxLevel];
+    pthread_rwlock_t rwlock_;
 };
 
 class VersionSet{
 public:
-    VersionSet(){
-        dummyVersion_ = Version();
-        current_ = &dummyVersion_;
-    }
+    VersionSet(YangkvMain* db, CondLock* lock);
+    void AppendVersion(Version* v);
+    void AppendFrozenList(SkipList* list, int idx);
+    Version* Current() {return current_;}
     class Builder;
 private:
-    friend class yangkvMain;
+    friend class YangkvMain;
     friend class Version;
     Version* current_;
-    Version dummyVersion_;
-    yangkvMain* db_;
+    Version dummy_versions_;
+    YangkvMain* db_;
+    CondLock* compact_lock_;
+    Compacter* compacter_;
 private:
 };
 

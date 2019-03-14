@@ -2,6 +2,7 @@
 #include "utils/hash_helper.h"
 #include "utils/status.h"
 #include "utils/config.h"
+#include "utils/condlock.h"
 #include <atomic>
 #pragma once
 
@@ -33,6 +34,8 @@ private:
 	Compacter* compacter_;
     WriterConfig* arg_[kMaxWriter];
     VersionSet* set_;
+    pthread_cond_t compact_lock_;
+    CondLock* bg_lock_;
 };
 
 void* workerRound(void*);

@@ -6,6 +6,12 @@ cc_library(
 )
 
 cc_library(
+    name = "condlock",
+    hdrs = ["condlock.h"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+)
+
+cc_library(
     name = "coding",
     hdrs = ["coding.h"],
     deps = [":slice",],

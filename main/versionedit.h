@@ -8,6 +8,7 @@
 namespace leveldb {
 
 class VersionSet;
+class Compacter;
 struct FileMetaData {
     int refs;
     std::string smallest;
@@ -26,7 +27,7 @@ public:
     void clear();
 private:
     friend class VersionSet;
-
+    friend class Compacter;
     typedef std::set< std::pair<int, uint64_t> > DeletedFileSet;
 
     std::string comparator_;

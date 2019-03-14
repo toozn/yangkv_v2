@@ -6,19 +6,19 @@
 
 namespace leveldb {
 
-class Compacter;
+class VersionSet;
 class Writer{
 public:
-    Writer(){}
-    Writer(Compacter*);
+	Writer(){};
+    Writer(VersionSet* set, int id);
     ~Writer();
 	bool getEntry(std::string& key, uint64_t seq, std::string* value, Status* s);
 	void mayInsertMessage();
 	MessageQueue queue_;
 private:
-    const static int kMaxListSize = 102400;
-    Compacter* compacter_;
+	int id_;
 	SkipList* list_;
+    VersionSet* set_;
     pthread_rwlock_t rwlock_;
 };
 

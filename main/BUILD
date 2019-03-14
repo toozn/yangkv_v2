@@ -16,20 +16,22 @@ cc_library(
     srcs = ["versionset.cpp"],
     hdrs = ["versionset.h"],
     deps = [":versionedit",
-            "//memory:writer",
-            "//memory:compacter",
             "//utils:hashhelper",
+            "//utils:condlock",
+            "//memory:compacter",
             ],
+    visibility = ["//memory:__pkg__"],
 )
 cc_library(
     name = "yangkvMain",
     srcs = ["yangkvMain.cpp"],
     hdrs = ["yangkvMain.h"],
-    deps = ["//memory:writer", 
-            "//memory:compacter",
+    deps = ["//memory:compacter",
             "//utils:env",
-            ":versionset",
+            "//memory:writer",
             "//utils:status",
+            "//utils:condlock",
+            "//utils:hashhelper",
            ],
 )
 

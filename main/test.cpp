@@ -7,21 +7,15 @@ using namespace leveldb;
 using namespace std;
 
 map<string, string>mp;
+
+int size_ = 10000;
+
 void* reader(void* arg) {
     auto db = Singleton::get();
-    for (int i = 0; i <= 10000; i++) {
+    for (int i = 0; i <= size_; i++) {
         string key = to_string(i);
         string value;
         Status s = db->getValue(key, &value);
-        /*
-        if (s.isNotFound()) {
-            cout << i << " NotFound" << endl;
-        }
-        else {
-            cout << i << " " << value << endl;
-        }
-        */
-        
         if (i % 2 == 0 && !s.isNotFound()) {
             printf("Error! %d\n", i);
         }
@@ -65,24 +59,21 @@ void test_MemEntry() {
 int main() {
     auto db = Singleton::get();
     db->init();
-    for (int i = 0; i <= 10000; i++) {
+    for (int i = 0; i <= size_; i++) {
         string val = to_string(i);
         mp[val] = val;
         db->setKey(val, val);
-        //usleep(5000);
     }
-    for (int i = 0; i <= 10000; i += 2) {
+    for (int i = 0; i <= size_; i += 2) {
         string val = to_string(i);
         mp[val] = "IsEmpty";
         db->delKey(val);
-        //usleep(5000);
     }
     pthread_t pid[8];
-    sleep(1);
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 4; i++) {
         pthread_create(&pid[i], NULL, reader, NULL);
     }
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 4; i++) {
         pthread_join(pid[i], NULL);
     }
     db->stop();

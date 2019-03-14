@@ -1,6 +1,7 @@
 #include "yangkvMain.h"
 #include "memory/writer.h"
 #include "versionset.h"
+#include "memory/compacter.h"
 #include <unistd.h>
 #include <iostream>
 
@@ -23,14 +24,17 @@ void* writerRound(void* arg_) {
 YangkvMain::YangkvMain(){}
 
 void YangkvMain::init() {
-    idx_ = 0;
-    compacter_ = new Compacter();
+    idx_ = 1;
+    bg_lock_ = new CondLock();
+    set_ = new VersionSet(this, bg_lock_);
+    compacter_ = new Compacter(this, bg_lock_);
     for (int id = 0; id < kMaxWriter; id++) {
-        writer_[id] = new Writer(compacter_);
+        writer_[id] = new Writer(set_, id);
         arg_[id] = new WriterConfig(0, id, writer_[id]);
         pthread_t tid;
         pthread_create(&tid, NULL, writerRound, (void*)arg_[id]);
     }
+
     sleep(1);
 }
 
@@ -51,20 +55,31 @@ Status YangkvMain::delKey(std::string& key) {
 }
 
 Status YangkvMain::getValue(std::string& key, std::string* value) {
-    uint64_t id = idx_;
+    uint64_t seq = idx_;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
     Status s;
-    bool result = writer_[writerID]->queue_.search(key, id, value, &s);
+    //search in message queue
+    bool result = writer_[writerID]->queue_.search(key, seq, value, &s);
     if (result) {
         return s;
     }
     //printf("%s %d\n", key.c_str(), __LINE__);
-    result = writer_[writerID]->getEntry(key, id, value, &s);
+    //search in activelist
+    result = writer_[writerID]->getEntry(key, seq, value, &s);
     if (result) {
         return s;
     }
     else {
-        return Status::NotFound();
+        //search in frozenlist and sstable
+        Version* curr_ = set_->Current();
+        result = curr_->Get(key, seq, value);
+        if (result) {
+            return Status::OK();
+        }
+        else {
+            return Status::NotFound();
+        }
+        
     }
 }
 

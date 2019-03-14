@@ -20,8 +20,10 @@ cc_library(
     srcs = ["writer.cpp"],
     hdrs = ["writer.h"],
     deps = [ "//utils:config", 
-             "//utils:dbformat", 
-            "compacter",
+             "//utils:dbformat",
+             ":skiplist",
+             ":message_queue",
+             "//main:versionset",
             ],
     visibility = ["//main:__pkg__"],
 )
@@ -33,6 +35,7 @@ cc_library(
     deps = [":message_queue", 
             "//utils:config",
             ":skiplist",
+            "//utils:condlock",
             ],
     visibility = ["//main:__pkg__"],
 )

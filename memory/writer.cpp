@@ -1,14 +1,15 @@
 #include "writer.h"
-#include "compacter.h"
+#include "main/versionset.h"
 #include <unistd.h>
 
 namespace leveldb {
 
-class compacter;
+class VersionSet;
 
-Writer::Writer(Compacter* compacter) {
+Writer::Writer(VersionSet* set, int id) {
+    id_ = id;
+    set_ = set;
     list_ = new SkipList();
-    compacter_ = compacter;
     pthread_rwlock_init(&rwlock_, NULL);
 }
 
@@ -20,12 +21,11 @@ void Writer::mayInsertMessage() {
     pthread_rwlock_wrlock(&rwlock_);
     while (queue_.isEmpty() == false) {
         MemEntry entry = queue_.getFront();
-        //entry->debug();
         list_->insert(entry);
         queue_.pop();
         //printf("Success Insert! KEY:%s VALUE:%s ID:%d\n", entry.key.data(), entry.value.data(), (int)entry.seq_num);
-        if (list_->size() >= kMaxListSize) {
-            compacter_->pushList(list_);
+        if (list_->size() >= kMaxActiveListSize) {
+            set_->AppendFrozenList(list_, id_);
             list_ = new SkipList();
         }
     }
