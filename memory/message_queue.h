@@ -9,11 +9,11 @@ public:
 	MessageQueue();
     ~MessageQueue();
 	void push(MemEntry entry);
-	MemEntry getFront();
+	MemEntry& getFront();
     void pop();
 	bool isFull();
 	bool isEmpty();
-	void debug();
+	void Debug();
     bool search(std::string& key, uint64_t seq, std::string* value, Status* s);
 private:
 	static const int kQueueSize = 40;

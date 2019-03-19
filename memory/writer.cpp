@@ -1,14 +1,24 @@
 #include "writer.h"
 #include "main/versionset.h"
+#include "utils/config.h"
 #include <unistd.h>
 
 namespace leveldb {
 
 class VersionSet;
 
-Writer::Writer(VersionSet* set, int id) {
-    id_ = id;
+void Writer::workRound() {
+    int id = config_->writerId;
+    printf("Writer%d begin to work\n", id);
+    while (config_->stopFLAG == false) {
+        mayInsertMessage();
+    }
+    printf("Quit Writer %d!\n", id);
+}
+
+Writer::Writer(VersionSet* set, WriterConfig* config) {
     set_ = set;
+    config_ = config;
     list_ = new SkipList();
     pthread_rwlock_init(&rwlock_, NULL);
 }
@@ -20,11 +30,10 @@ Writer::~Writer() {
 void Writer::mayInsertMessage() {
     pthread_rwlock_wrlock(&rwlock_);
     while (queue_.isEmpty() == false) {
-        MemEntry entry = queue_.getFront();
-        list_->insert(entry);
+        list_->insert(queue_.getFront());
         queue_.pop();
-        //printf("Success Insert! KEY:%s VALUE:%s ID:%d\n", entry.key.data(), entry.value.data(), (int)entry.seq_num);
         if (list_->size() >= kMaxActiveListSize) {
+            printf("New Frozen List!\n");
             set_->AppendFrozenList(list_, id_);
             list_ = new SkipList();
         }
@@ -56,6 +65,7 @@ bool Writer::getEntry(std::string& key, uint64_t seq, std::string* value, Status
     return true;
 }
 
+/*
 void* workRound(void* arg_) {
     pthread_detach(pthread_self());
     auto arg = (WriterConfig*)arg_;
@@ -67,5 +77,6 @@ void* workRound(void* arg_) {
     printf("Writer Quit!\n");
     return 0;
 }
+*/
 
 }

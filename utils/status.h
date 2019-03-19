@@ -1,10 +1,12 @@
 #include <algorithm>
 #include <string>
-#include "env.h"
 #pragma once
 
 namespace leveldb {
-	
+
+static const std::string sNotFound = "NotFound";
+static const std::string sError = "Error";
+static const std::string sCorruption = "Corruption";
 class Status {
 public:
 	Status() {
@@ -26,6 +28,9 @@ public:
 	static Status Error() {
 		return Status(sError);
 	}
+	static Status Corruption() {
+		return Status(sCorruption);
+	}
 
 	bool ok() {
 		return msg_ == "";
@@ -35,6 +40,9 @@ public:
 	}
 	bool isError() {
 		return msg_ == sError;
+	}
+	bool isCorruption() {
+		return msg_ == sCorruption;
 	}
 private:
 	std::string msg_;

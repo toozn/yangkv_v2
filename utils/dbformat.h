@@ -10,23 +10,23 @@ struct MemEntry {
 	Slice value;
 	uint64_t seq_num;
 	bool value_type;
-	std::string* k;
-	std::string* v;
 	MemEntry() {}
 	MemEntry(std::string& key_, std::string& value_, uint64_t seq, bool type) {
-		k = new std::string(key_);
-		v = new std::string(value_);
-		key = Slice(*k);
-		value = Slice(*v);
+		key = Slice(key_);
+		value = Slice(value_);
 		seq_num = seq;
 		value_type = type;
 	}
-	void debug() {
-		printf("key:%s value:%s seq_num:%d value_type:%d\n",
+	void Debug() {
+		
+		assert(key.data()[key.size()] == 0);
+		assert(value.data()[value.size()] == 0);
+		printf("key:%s value:%s seq_num:%d value_type:%d len:%d\n",
         key.data(),
         value.data(),
         (int)seq_num,
-        (int)value_type);
+        (int)value_type,
+        (int)value.size());
 	}
 };
 

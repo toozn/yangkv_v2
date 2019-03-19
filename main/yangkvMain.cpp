@@ -9,30 +9,39 @@ namespace leveldb {
 
 std::string NullStr = "";
 
-void* writerRound(void* arg_) {
-    pthread_detach(pthread_self());
-    auto arg = (WriterConfig*) arg_;
-    auto writer = arg->instance;
-    int id = arg->writerId;
-    printf("Worker id: %d begin to work\n", id);
-    while (arg->stopFLAG == false) {
-        writer->mayInsertMessage();
-    }
-    printf("Quit Writer %d!\n", id);
-    return 0;
-}
 YangkvMain::YangkvMain(){}
+
+void* WriterBegin(void* instance) {
+    pthread_detach(pthread_self());
+    assert(instance != nullptr);
+    ((Writer*)instance)->workRound();
+    return nullptr;
+}
+
+void* CompacterBegin(void* instance) {
+    pthread_detach(pthread_self());
+    assert(instance != nullptr);
+    ((Compacter*)instance)->workRound();
+    return nullptr;
+}
 
 void YangkvMain::init() {
     idx_ = 1;
     bg_lock_ = new CondLock();
+    env_ = new Env();
     set_ = new VersionSet(this, bg_lock_);
-    compacter_ = new Compacter(this, bg_lock_);
     for (int id = 0; id < kMaxWriter; id++) {
-        writer_[id] = new Writer(set_, id);
-        arg_[id] = new WriterConfig(0, id, writer_[id]);
+        
+        writer_args_[id] = new WriterConfig(id);
+        writer_[id] = new Writer(set_, writer_args_[id]);
         pthread_t tid;
-        pthread_create(&tid, NULL, writerRound, (void*)arg_[id]);
+        pthread_create(&tid, nullptr, WriterBegin, (void*)writer_[id]);
+    }
+    {
+        compacter_args_ = new CompacterConfig();
+        compacter_ = new Compacter(set_, bg_lock_, env_, compacter_args_);
+        pthread_t tid;
+        pthread_create(&tid, nullptr, CompacterBegin, (void*)compacter_);
     }
 
     sleep(1);
@@ -86,8 +95,11 @@ Status YangkvMain::getValue(std::string& key, std::string* value) {
 
 void YangkvMain::stop() {
     for (int id = 0; id < kMaxWriter; id++) {
-        arg_[id]->stopFLAG = true;
+        writer_args_[id]->stopFLAG = true;
     }
+    compacter_args_->stopFLAG = true;
+    sleep(2);
+    puts("YangKV Stopped!");
 }
 
 }

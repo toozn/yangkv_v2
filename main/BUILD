@@ -2,7 +2,19 @@ cc_library(
     name = "singleton",
     srcs = ["singleton.cpp"],
     hdrs = ["singleton.h"],
-    deps = [":yangkvMain"]
+    deps = [":yangkvMain"],
+)
+
+cc_library(
+    name = "builder",
+    srcs = ["builder.cpp"],
+    hdrs = ["builder.h"],
+    deps = ["//utils:env",
+            "//utils:dbformat",
+            "//memory:skiplist",
+            ":versionedit",
+            "//utils:filename",],
+    visibility = ["//memory:__pkg__"],
 )
 
 cc_library(
@@ -18,7 +30,6 @@ cc_library(
     deps = [":versionedit",
             "//utils:hashhelper",
             "//utils:condlock",
-            "//memory:compacter",
             ],
     visibility = ["//memory:__pkg__"],
 )

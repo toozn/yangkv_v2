@@ -16,22 +16,18 @@ public:
 class WriterConfig{
 public:
     WriterConfig(){}
-    WriterConfig(bool flag, int id, Writer* instance_) {
-        stopFLAG = flag;
-        instance = instance_;
+    WriterConfig(int id) {
+        stopFLAG = false;
         writerId = id;
     }
-    Writer* instance;
     bool stopFLAG;
     int writerId;
 };
 
 class CompacterConfig{
 public:
-    CompacterConfig(){}
-    CompacterConfig(bool flag, Compacter* instance_) {
-        stopFLAG = flag;
-        instance = instance_;
+    CompacterConfig() {
+        stopFLAG = false;
     }
     Compacter* instance;
     bool stopFLAG;

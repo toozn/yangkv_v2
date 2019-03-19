@@ -6,6 +6,12 @@ cc_library(
 )
 
 cc_library(
+    name = "filename",
+    hdrs = ["filename.h"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+)
+
+cc_library(
     name = "condlock",
     hdrs = ["condlock.h"],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
@@ -51,8 +57,12 @@ cc_library(
 
 cc_library(
     name = "env",
+    srcs = ["env.cpp"],
     hdrs = ["env.h"],
-    visibility = ["//main:__pkg__"],
+    deps = [":status",
+            ":slice",
+            ],
+    visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
 
 cc_library(
@@ -64,6 +74,5 @@ cc_library(
 cc_library(
     name = "status",
     hdrs = ["status.h"],
-    deps = [":env",],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )

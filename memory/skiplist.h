@@ -5,6 +5,8 @@
 
 namespace leveldb {
 
+class MergeIterator;
+
 class SkipList {
 public:
     SkipList(){
@@ -22,12 +24,15 @@ public:
             delete this;
         }
     }
-    void insert(MemEntry entry) {
+    void insert(MemEntry& entry) {
         if (list_.size() == 0) {
             id_ = entry.seq_num;
         }
         Slice s;
+        entry.Debug();
         EncodeMemEntry(entry, s);
+        DecodeMemEntry(s, entry);
+        entry.Debug();
         list_[entry.key.ToString()] = s;
     }
     Status get(std::string key, Slice& value) {
@@ -42,6 +47,16 @@ public:
     }
     unsigned int size() {
         return list_.size();
+    }
+    std::map<std::string, Slice>* get_list() {
+        return &list_;
+    }
+    void Debug() {
+        for (auto it: list_) {
+            MemEntry entry;
+            DecodeMemEntry(it.second, entry);
+            entry.Debug();
+        }
     }
 private:
     unsigned long long id_;

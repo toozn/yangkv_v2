@@ -1,4 +1,5 @@
 #include "message_queue.h"
+#include "utils/env.h"
 #include <unistd.h>
 #include <iostream>
 using namespace std;
@@ -16,7 +17,6 @@ void MessageQueue::push(MemEntry entry) {
 	std::lock_guard<std::mutex> lock(lock_);
     while(isFull()) usleep(5);
 	queue_[w_ptr % kQueueSize] = entry;
-    //debug();
 	w_ptr++;
 }
 
@@ -25,7 +25,7 @@ void MessageQueue::pop() {
 	r_ptr++;
 }
 
-MemEntry MessageQueue::getFront() {
+MemEntry& MessageQueue::getFront() {
     assert(w_ptr > r_ptr);
     return queue_[(r_ptr % kQueueSize)];
 }
@@ -57,13 +57,13 @@ bool MessageQueue::search(std::string& key, uint64_t seq, std::string* value, St
     return false;
 }
 
-void MessageQueue::debug() {
+void MessageQueue::Debug() {
     uint64_t begin = w_ptr;
     uint64_t end = r_ptr;
     assert(end <= kQueueSize + begin);
     for (uint64_t i = begin; i >= end; i--) {
         MemEntry entry = queue_[(i % kQueueSize)];
-        entry.debug();
+        entry.Debug();
     }
     puts("-----------------------------");
 }

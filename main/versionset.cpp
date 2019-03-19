@@ -1,6 +1,5 @@
 #include "versionset.h"
 #include "utils/hash_helper.h"
-#include "memory/compacter.h"
 #include "utils/condlock.h"
 #include <unistd.h>
 namespace leveldb {
@@ -30,6 +29,7 @@ Status Version::apply(Version* curr, VersionEdit* edit) {
 void Version::AppendList(SkipList* list, int idx) {
     pthread_rwlock_wrlock(&rwlock_);
     list_[idx].push_back(list);
+    //list->Debug();
     pthread_rwlock_unlock(&rwlock_);
 }
 
@@ -246,7 +246,7 @@ void VersionSet::AppendFrozenList(SkipList* list, int idx) {
     assert(compact_lock_ != nullptr);
     assert(current_ != nullptr);
     compact_lock_->Lock();
-    if (compacter_->inCompact()) {
+    if (current_->isFull()) {
         compact_lock_->Wait();
     }
     current_->AppendList(list, idx);

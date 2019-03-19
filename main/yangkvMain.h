@@ -29,15 +29,13 @@ private:
 	friend class VersionSet;
 	std::atomic <uint64_t> idx_;
 	Env* env_;
-    
 	Writer* writer_[kMaxWriter];
-	Compacter* compacter_;
-    WriterConfig* arg_[kMaxWriter];
+    WriterConfig* writer_args_[kMaxWriter];
+    Compacter* compacter_;
+    CompacterConfig* compacter_args_;
     VersionSet* set_;
     pthread_cond_t compact_lock_;
     CondLock* bg_lock_;
 };
-
-void* workerRound(void*);
 
 }
