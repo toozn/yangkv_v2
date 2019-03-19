@@ -2,25 +2,24 @@
 #include <iostream>
 
 namespace leveldb {
-
 Status DecodeMemEntry(Slice& s, MemEntry& entry) {
 	uint32_t klength, vlength;
 	const char* ptr = s.data();
 	const char* key_ptr = GetVarint32Ptr(ptr, ptr + 5, &klength);
-	entry.key = Slice(key_ptr, klength - 8);
+	entry.key = Slice(key_ptr, klength - 9);
 	uint64_t info = DecodeFixed64(key_ptr + klength - 8);
 	entry.seq_num = info >> 8;
 	entry.value_type = info & 255;
 	const char* vptr = key_ptr + klength;
 	vptr = GetVarint32Ptr(vptr, vptr + 5, &vlength);
-	entry.value = Slice(vptr, vlength);
+	entry.value = Slice(vptr, vlength - 1);
 	return Status::OK();
 }
 
 void EncodeMemEntry(MemEntry& entry, Slice& s) {
 
-	uint64_t key_size = entry.key.size();
-	uint64_t val_size = entry.value.size();
+	uint64_t key_size = entry.key.size() + 1;
+	uint64_t val_size = entry.value.size() + 1;
 	uint64_t internal_key_size = key_size + 8;
 	const uint64_t encoded_len =
 	VarintLength(internal_key_size) + internal_key_size + VarintLength(val_size) + val_size;
@@ -34,6 +33,8 @@ void EncodeMemEntry(MemEntry& entry, Slice& s) {
 	memcpy(p, entry.value.data(), val_size);
   s = Slice(buf, encoded_len);
 	assert(p + val_size == buf + encoded_len);
+  
+  
 }
 
 LookupKey::LookupKey(Slice& key, uint64_t seq_num) {
@@ -231,6 +232,5 @@ bool GetLengthPrefixedSlice(Slice* input, Slice* result) {
     return false;
   }
 }
-
 
 }

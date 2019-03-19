@@ -1,6 +1,6 @@
 #include <string>
 #include <cstring>
-
+#pragma once
 namespace leveldb {
 
 std::string TableFileName(uint64_t file_number) {

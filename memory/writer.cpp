@@ -33,8 +33,7 @@ void Writer::mayInsertMessage() {
         list_->insert(queue_.getFront());
         queue_.pop();
         if (list_->size() >= kMaxActiveListSize) {
-            printf("New Frozen List!\n");
-            set_->AppendFrozenList(list_, id_);
+            set_->AppendFrozenList(list_, config_->writerId);
             list_ = new SkipList();
         }
     }

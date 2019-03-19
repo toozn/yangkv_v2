@@ -24,11 +24,20 @@ public:
 	}
 	Slice& GetNext() {
 		assert(mg_it != mp_.end());
-		return mg_it->second;
+		Slice& x = mg_it->second;
 		mg_it++;
+		return x;
 	}
 	bool End() {
 		return mg_it == mp_.end();
+	}
+	void Debug() {
+		for (auto it: mp_) {
+			MemEntry entry;
+			DecodeMemEntry(it.second, entry);
+			printf("%s: ", it.first.c_str());
+			entry.Debug();
+		}
 	}
 private:
 	std::map<std::string, Slice> mp_;
@@ -44,13 +53,15 @@ Status BuildTable(std::vector<SkipList*>* frozenlists, Env* env,
 	PosixWritableFile* file;
     Status s = env->NewWritableFile(fname, &file);
 	//TableBuilder* builder = new TableBuilder(options, file);
-	int count = 0;
-	MemEntry entry;
+	int count = 1;
+	
 	while(!it->End()) {
+		MemEntry entry;
 		DecodeMemEntry(it->GetNext(), entry);
 		count++;
-		if(count % 100 == 0) entry.Debug();
+		if(count % 10 == 0) entry.Debug();
 	}
+	
 	delete it;
 	return Status::OK();
 }

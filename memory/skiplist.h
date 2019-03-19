@@ -29,13 +29,10 @@ public:
             id_ = entry.seq_num;
         }
         Slice s;
-        entry.Debug();
         EncodeMemEntry(entry, s);
-        DecodeMemEntry(s, entry);
-        entry.Debug();
         list_[entry.key.ToString()] = s;
     }
-    Status get(std::string key, Slice& value) {
+    Status get(std::string& key, Slice& value) {
         if (list_.count(key) == 0) {
             return Status::NotFound();
         }
@@ -52,6 +49,7 @@ public:
         return &list_;
     }
     void Debug() {
+        printf("size: %d\n", int(list_.size()));
         for (auto it: list_) {
             MemEntry entry;
             DecodeMemEntry(it.second, entry);

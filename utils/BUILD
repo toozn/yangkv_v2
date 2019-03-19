@@ -17,19 +17,12 @@ cc_library(
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
 
-cc_library(
-    name = "coding",
-    hdrs = ["coding.h"],
-    deps = [":slice",],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
-)
 
 cc_library(
     name = "dbformat",
     srcs = ["dbformat.cpp"],
     hdrs = ["dbformat.h"],
-    deps = [":env",
-            ":coding",],
+    deps = [":env",],
     visibility = ["//main:__pkg__", "//memory:__pkg__"],
 )
 

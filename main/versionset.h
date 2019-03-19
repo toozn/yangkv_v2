@@ -17,13 +17,13 @@ public:
     Version(VersionSet* set) {
         set_ = set;
         ref_ = 0;
-        list_count = 0;
+        list_count_ = 0;
         pthread_rwlock_init(&rwlock_, NULL);
     }
     void Ref();
     void Unref();
     bool Get(std::string& key, uint64_t seq, std::string* value);
-    bool isFull() {return list_count >= kMaxFrozenList;}
+    bool isFull() {return list_count_ >= kMaxFrozenList;}
     void AppendList(SkipList* list, int idx);
     void Debug();
     Status apply(Version* curr, VersionEdit* edit);
@@ -36,7 +36,7 @@ private:
     friend class VersionEdit;
     VersionSet* set_;
     std::vector<SkipList*>list_[kMaxWriter];
-    uint32_t list_count;
+    uint32_t list_count_;
     std::vector<FileMetaData*>files_[kMaxLevel];
     pthread_rwlock_t rwlock_;
 };
