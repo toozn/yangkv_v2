@@ -247,7 +247,6 @@ void VersionSet::AppendFrozenList(SkipList* list, int idx) {
     assert(current_ != nullptr);
     compact_lock_->Lock();
     if (current_->isFull()) {
-        printf("waiting for compact!\n");
         compact_lock_->Wait();
     }
     current_->AppendList(list, idx);

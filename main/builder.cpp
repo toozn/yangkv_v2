@@ -48,23 +48,31 @@ private:
 Status BuildTable(std::vector<SkipList*>* frozenlists, Env* env,
 					FileMetaData* meta) {
 	assert(frozenlists != nullptr);
-	MergeIterator* it = new MergeIterator(frozenlists);
 	meta->file_size = 0;
 	std::string fname = TableFileName(meta->number);
 	WritableFile* file;
     Status s = env->NewWritableFile(fname, &file);
-    Options opt;
+    Options opt = Options();
 	TableBuilder* builder = new TableBuilder(opt, file);
-	int count = 1;
-	
-	while(!it->End()) {
+	MergeIterator iter(frozenlists);
+	while(!iter.End()) {
 		MemEntry entry;
-		DecodeMemEntry(it->GetNext(), entry);
-		count++;
-		if(count % 10 == 0) entry.Debug();
+		DecodeMemEntry(iter.GetNext(), entry);
+		builder->Add(entry.key, entry.value);
 	}
-	
-	delete it;
+	s = builder->Finish();
+    if (s.ok()) {
+      meta->file_size = builder->FileSize();
+      assert(meta->file_size > 0);
+    }
+    if (s.ok()) {
+      s = file->Sync();
+    }
+    if (s.ok()) {
+      s = file->Close();
+    }
+    delete file;
+	printf("New File! %s\n", fname.c_str());
 	return Status::OK();
 }
 

@@ -12,7 +12,7 @@
 #include "utils/dbformat.h"
 
 namespace leveldb {
-
+using namespace std;
 struct TableBuilder::Rep {
   Options options;
   Options index_block_options;
@@ -92,9 +92,8 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
   assert(!r->closed);
   if (!ok()) return;
   if (r->num_entries > 0) {
-    assert(options_->comparator->Compare(key, r->last_key) > 0);
+    assert(r->options.comparator->Compare(key, r->last_key) > 0);
   }
-
   if (r->pending_index_entry) {
     assert(r->data_block.empty());
     r->options.comparator->FindShortestSeparator(&r->last_key, key);
@@ -111,7 +110,6 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
   r->last_key.assign(key.data(), key.size());
   r->num_entries++;
   r->data_block.Add(key, value);
-
   const size_t estimated_block_size = r->data_block.CurrentSizeEstimate();
   if (estimated_block_size >= r->options.block_size) {
     Flush();

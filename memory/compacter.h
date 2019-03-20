@@ -41,6 +41,7 @@ private:
     CondLock* lock_;
     bool inCompact_;
     Env* env_;
+    uint32_t file_seq_num_;
 };
 
 }

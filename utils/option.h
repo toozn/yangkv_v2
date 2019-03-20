@@ -139,7 +139,7 @@ public:
       create_if_missing(false),
       error_if_exists(false),
       paranoid_checks(false),
-      //env(Env::Default()),
+      env(new Env()),
       //info_log(nullptr),
       write_buffer_size(4<<20),
       max_open_files(1000),

@@ -9,9 +9,9 @@ void Compacter::workRound() {
     printf("Compacter begin to work!\n");
     while (config_->stopFLAG == false) {
     	if (set_->current_->isFull()) {
-            printf("Begin to Dump frozenlist!\n");
     		inCompact_ = true;
     		FileMetaData metadata;
+            metadata.number = ++file_seq_num_;
     		Status s;
     		s = BuildTable(set_->current_->list_, env_, &metadata);
     		set_->AppendVersion(new Version(set_));

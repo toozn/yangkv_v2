@@ -3,6 +3,7 @@
 #include <string.h>
 #include <string>
 #include "status.h"
+#include <iostream>
 #pragma once
 
 namespace leveldb {
