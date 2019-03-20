@@ -2,19 +2,35 @@ cc_library(
     name = "slice",
     hdrs = ["slice.h"],
     deps = [":status",],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
+)
+
+cc_library(
+    name = "comparator",
+    hdrs = ["comparator.h"],
+    deps = [":slice",],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
+)
+
+cc_library(
+    name = "option",
+    hdrs = ["option.h"],
+    deps = [":slice",
+            ":env",
+            ":comparator",],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 cc_library(
     name = "filename",
     hdrs = ["filename.h"],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 cc_library(
     name = "condlock",
     hdrs = ["condlock.h"],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 
@@ -23,7 +39,7 @@ cc_library(
     srcs = ["dbformat.cpp"],
     hdrs = ["dbformat.h"],
     deps = [":env",],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 
@@ -55,17 +71,17 @@ cc_library(
     deps = [":status",
             ":slice",
             ],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 cc_library(
     name = "config",
     hdrs = ["config.h"],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
 cc_library(
     name = "status",
     hdrs = ["status.h"],
-    visibility = ["//main:__pkg__", "//memory:__pkg__"],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )

@@ -1,4 +1,6 @@
 #include "block.h"
+#include "format.h"
+#include "utils/dbformat.h"
 
 namespace leveldb {
 

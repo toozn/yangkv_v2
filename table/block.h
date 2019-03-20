@@ -1,18 +1,23 @@
-#include "/memory/skiplist.h"
+#include <iostream>
+#include <string>
+#pragma once
+namespace leveldb{
 
-using namespace std;
-
-class Block() {
+class BlockContents;
+class Block {
 public:
-	Block();
+	Block(){};
+	Block(const BlockContents& contents);
 	~Block();
 	size_t size() {
 		return size_;
 	}
 private:
-	uint32_t NumRestarts();
+	uint32_t NumRestarts() const;
     uint32_t restart_offset_;
     const char* data_;
     size_t size_;
     bool owned_;
+};
+
 }

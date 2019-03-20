@@ -2,7 +2,7 @@
 #include "utils/dbformat.h"
 #include <unistd.h>
 #include <bits/stdc++.h>
-
+#pragma once
 using namespace leveldb;
 using namespace std;
 

@@ -1,5 +1,6 @@
 #include "utils/slice.h"
 #include "utils/status.h"
+#include "utils/env.h"
 #pragma once
 namespace leveldb {
 	
@@ -8,6 +9,10 @@ class Block;
 class BlockHandle{
 public:
 	// The offset of the block in the file.
+	BlockHandle()
+    : offset_(~static_cast<uint64_t>(0)),
+      size_(~static_cast<uint64_t>(0)) {
+	}
 	uint64_t offset() const { return offset_; }
 	void set_offset(uint64_t offset) { offset_ = offset; }
 
@@ -17,6 +22,7 @@ public:
 
 	void EncodeTo(std::string* dst) const;
 	Status DecodeFrom(Slice* input);
+	enum { kMaxEncodedLength = 10 + 10 };
 private:
 	uint64_t offset_;
 	uint64_t size_;
@@ -55,14 +61,6 @@ class Footer {
 	BlockHandle index_handle_;
 };
 
-// kTableMagicNumber was picked by running
-//    echo http://code.google.com/p/leveldb/ | sha1sum
-// and taking the leading 64 bits.
-static const uint64_t kTableMagicNumber = 0xdb4775248b80fb57ull;
-
-// 1-byte type + 32-bit crc
-static const size_t kBlockTrailerSize = 5;
-
 struct BlockContents {
 	Slice data;           // Actual contents of data
 	bool cachable;        // True iff data can be cached
@@ -72,16 +70,10 @@ struct BlockContents {
 // Read the block identified by "handle" from "file".  On failure
 // return non-OK.  On success fill *result and return OK.
 Status ReadBlock(RandomAccessFile* file,
-                 const ReadOptions& options,
                  const BlockHandle& handle,
                  BlockContents* result);
 
 // Implementation details follow.  Clients should ignore,
-
-inline BlockHandle::BlockHandle()
-    : offset_(~static_cast<uint64_t>(0)),
-      size_(~static_cast<uint64_t>(0)) {
-}
 
 
 }

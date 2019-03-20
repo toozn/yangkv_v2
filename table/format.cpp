@@ -1,5 +1,6 @@
 #include "format.h"
-#include "utils/coding.h"
+#include "utils/dbformat.h"
+#include "utils/env.h"
 namespace leveldb {
 
 void BlockHandle::EncodeTo(std::string* dst) const {
@@ -15,7 +16,7 @@ Status BlockHandle::DecodeFrom(Slice* input) {
       GetVarint64(input, &size_)) {
     return Status::OK();
   } else {
-    return Status::Corruption("bad block handle");
+    return Status::Error();
   }
 }
 
@@ -37,7 +38,7 @@ Status Footer::DecodeFrom(Slice* input) {
   const uint64_t magic = ((static_cast<uint64_t>(magic_hi) << 32) |
                           (static_cast<uint64_t>(magic_lo)));
   if (magic != kTableMagicNumber) {
-    return Status::Corruption("not an sstable (bad magic number)");
+    return Status::Error();
   }
 
   Status result = metaindex_handle_.DecodeFrom(input);
@@ -53,7 +54,6 @@ Status Footer::DecodeFrom(Slice* input) {
 }
 
 Status ReadBlock(RandomAccessFile* file,
-                 const ReadOptions& options,
                  const BlockHandle& handle,
                  BlockContents* result) {
   result->data = Slice();
@@ -69,10 +69,10 @@ Status ReadBlock(RandomAccessFile* file,
   if (!s.ok()) {
     delete[] buf;
     return s;
-  }
+  } 
   if (contents.size() != n + kBlockTrailerSize) {
     delete[] buf;
-    return Status::Corruption();
+    return Status::Error();
   }
 
   // Check the crc of the type and the block contents
@@ -93,30 +93,10 @@ Status ReadBlock(RandomAccessFile* file,
         result->heap_allocated = true;
         result->cachable = true;
       }
-
-      // Ok
       break;
-    case kSnappyCompression: {
-      size_t ulength = 0;
-      if (!port::Snappy_GetUncompressedLength(data, n, &ulength)) {
-        delete[] buf;
-        return Status::Corruption("corrupted compressed block contents");
-      }
-      char* ubuf = new char[ulength];
-      if (!port::Snappy_Uncompress(data, n, ubuf)) {
-        delete[] buf;
-        delete[] ubuf;
-        return Status::Corruption("corrupted compressed block contents");
-      }
-      delete[] buf;
-      result->data = Slice(ubuf, ulength);
-      result->heap_allocated = true;
-      result->cachable = true;
-      break;
-    }
     default:
       delete[] buf;
-      return Status::Corruption("bad block type");
+      return Status::Error();
   }
 
   return Status::OK();

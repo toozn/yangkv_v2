@@ -1,8 +1,8 @@
 #include "message_queue.h"
+#include "utils/dbformat.h"
 #include "utils/env.h"
 #include <unistd.h>
 #include <iostream>
-using namespace std;
 namespace leveldb {
 
 MessageQueue::MessageQueue() {

@@ -1,3 +1,5 @@
+#ifndef _YANGKVMAIN_H
+#define _YANGKVMAIN_H
 #include "utils/env.h"
 #include "utils/hash_helper.h"
 #include "utils/status.h"
@@ -39,3 +41,5 @@ private:
 };
 
 }
+
+#endif

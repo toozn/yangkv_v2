@@ -4,6 +4,7 @@
 #include "versionedit.h"
 #include "utils/env.h"
 #include "utils/filename.h"
+#include "table/table_builder.h"
 #include <map>
 
 namespace leveldb {
@@ -50,9 +51,10 @@ Status BuildTable(std::vector<SkipList*>* frozenlists, Env* env,
 	MergeIterator* it = new MergeIterator(frozenlists);
 	meta->file_size = 0;
 	std::string fname = TableFileName(meta->number);
-	PosixWritableFile* file;
+	WritableFile* file;
     Status s = env->NewWritableFile(fname, &file);
-	//TableBuilder* builder = new TableBuilder(options, file);
+    Options opt;
+	TableBuilder* builder = new TableBuilder(opt, file);
 	int count = 1;
 	
 	while(!it->End()) {

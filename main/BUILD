@@ -9,10 +9,10 @@ cc_library(
     name = "builder",
     srcs = ["builder.cpp"],
     hdrs = ["builder.h"],
-    deps = ["//utils:env",
-            "//utils:dbformat",
+    deps = [
             "//memory:skiplist",
             ":versionedit",
+            "//table:table_builder",
             "//utils:filename",],
     visibility = ["//memory:__pkg__"],
 )
