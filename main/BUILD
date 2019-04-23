@@ -21,7 +21,8 @@ cc_library(
     name = "versionedit",
     srcs = ["versionedit.cpp"],
     hdrs = ["versionedit.h"],
-    deps = ["//memory:skiplist",],
+    deps = ["//memory:skiplist",
+            "//utils:env",],
 )
 cc_library(
     name = "versionset",

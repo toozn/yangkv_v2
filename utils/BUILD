@@ -65,6 +65,17 @@ cc_library(
 )
 
 cc_library(
+    name = "logwriter",
+    srcs = ["logwriter.cpp"],
+    hdrs = ["logwriter.h"],
+    deps = [":status",
+            ":slice",
+            ":dbformat",],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
+)
+
+
+cc_library(
     name = "env",
     srcs = ["env.cpp"],
     hdrs = ["env.h"],

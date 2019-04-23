@@ -64,7 +64,57 @@ void mementryTEST() {
     for (int i = 0; i < sz; i++) delete ptrs[i];
 }
 */
+
+void CMD() {
+    auto db = Singleton::get();
+    db->init();
+    printf("+---------------------------------------------+\n");
+    printf("|Please input following command:              |\n");
+    printf("|set:    set k-v pair data into database      |\n");
+    printf("|get:    get k-v pair data from database      |\n");
+    printf("|delete: delete k-v pair data from database   |\n");
+    printf("|quit:   quit from database                   |\n");
+    printf("+---------------------------------------------+\n");
+    string op, key, value;
+    while(1) {
+        cin >> op;
+        if (op == "set") {
+            printf("Please input key: ");
+            cin >> key;
+            printf("Please input value: ");
+            cin >> value;
+            db->setKey(key, value);
+            printf("Set finished!\n");   
+        }
+        else if(op == "get") {
+            printf("Please input key: ");
+            cin >> key;
+            Status s = db->getValue(key, &value);
+            if (s.ok()) {
+                printf("Value is: %s\n", value.c_str());
+            }
+            else {
+                printf("Not Found\n");
+            }
+        }
+        else if(op == "delete") {
+            printf("Please input key: ");
+            cin >> key;
+            db->delKey(key);
+            printf("Delete finished!\n");
+        }
+        else if(op == "quit") {
+            db->stop();
+            sleep(1);
+            return;
+        }
+    }
+    
+}
+
 int main() {
+    //CMD();
+    //return 0;
     //codingTEST();
     //mementryTEST();
     //return 0;

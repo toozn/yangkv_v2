@@ -33,7 +33,7 @@ void YangkvMain::init() {
     for (int id = 0; id < kMaxWriter; id++) {
         
         writer_args_[id] = new WriterConfig(id);
-        writer_[id] = new Writer(set_, writer_args_[id]);
+        writer_[id] = new Writer(set_, writer_args_[id], env_);
         pthread_t tid;
         pthread_create(&tid, nullptr, WriterBegin, (void*)writer_[id]);
     }
@@ -50,7 +50,7 @@ void YangkvMain::init() {
 Status YangkvMain::setKey(std::string& key, std::string& value, bool del_flag) {
 	uint64_t id = idx_++;
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
-    auto queue = &writer_[writerID]->queue_;
+    auto queue = writer_[writerID]->queue_;
     assert(queue != nullptr);
     MemEntry entry = MemEntry(key, value, id, del_flag);
     //entry.debug();
@@ -68,7 +68,7 @@ Status YangkvMain::getValue(std::string& key, std::string* value) {
     int writerID = strHash(key, kSeedForWriter) % kMaxWriter;
     Status s;
     //search in message queue
-    bool result = writer_[writerID]->queue_.search(key, seq, value, &s);
+    bool result = writer_[writerID]->queue_->search(key, seq, value, &s);
     if (result) {
         return s;
     }

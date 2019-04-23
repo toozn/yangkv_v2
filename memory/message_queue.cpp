@@ -3,11 +3,25 @@
 #include "utils/env.h"
 #include <unistd.h>
 #include <iostream>
+#pragma once
 namespace leveldb {
 
-MessageQueue::MessageQueue() {
+std::string LogFileName(uint64_t file_number, uint32_t writer_number) {
+    return "yang_log_writer_" + std::to_string(writer_number)
+     + "_" + std::to_string(file_number);
+}
+
+MessageQueue::MessageQueue(uint32_t writerid, Env* env) {
 	w_ptr = 1;
 	r_ptr = 1;
+    logid_ = 1;
+    env_ = env;
+    logfile_ = nullptr;
+    writerid_ = writerid;
+    Status s = env_->NewWritableFile(
+        LogFileName(logid_, writerid_), &logfile_);
+    assert(logfile_ != nullptr);
+    log_ = new log::Writer(logfile_);
 }
 
 MessageQueue::~MessageQueue() {
@@ -15,6 +29,7 @@ MessageQueue::~MessageQueue() {
 
 void MessageQueue::push(MemEntry entry) {
 	std::lock_guard<std::mutex> lock(lock_);
+    Status s = log_->AddRecord(entry);
     while(isFull()) usleep(5);
 	queue_[w_ptr % kQueueSize] = entry;
 	w_ptr++;

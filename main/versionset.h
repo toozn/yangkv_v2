@@ -39,6 +39,7 @@ private:
     uint32_t list_count_;
     std::vector<FileMetaData*>files_[kMaxLevel];
     pthread_rwlock_t rwlock_;
+    uint32_t logid_[kMaxWriter];
 };
 
 class VersionSet{
@@ -57,6 +58,7 @@ private:
     YangkvMain* db_;
     CondLock* compact_lock_;
     Compacter* compacter_;
+
 private:
 };
 

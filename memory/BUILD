@@ -3,7 +3,10 @@ cc_library(
     name = "message_queue",
     srcs = ["message_queue.cpp"],
     hdrs = ["message_queue.h"],
-    deps = ["//utils:dbformat",],
+    deps = ["//utils:dbformat",
+            "//utils:env",
+            "//utils:logwriter",
+            "//utils:filename"],
     visibility = ["//main:__pkg__"],
 )
 

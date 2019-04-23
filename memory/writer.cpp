@@ -16,22 +16,25 @@ void Writer::workRound() {
     printf("Quit Writer %d!\n", id);
 }
 
-Writer::Writer(VersionSet* set, WriterConfig* config) {
+Writer::Writer(VersionSet* set, WriterConfig* config, Env* env) {
     set_ = set;
+    env_ = env;
     config_ = config;
     list_ = new SkipList();
+    queue_ = new MessageQueue(config_->writerId, env_);
     pthread_rwlock_init(&rwlock_, NULL);
 }
 
 Writer::~Writer() {
     delete list_;
+    delete queue_;
 }
 
 void Writer::mayInsertMessage() {
     pthread_rwlock_wrlock(&rwlock_);
-    while (queue_.isEmpty() == false) {
-        list_->insert(queue_.getFront());
-        queue_.pop();
+    while (queue_->isEmpty() == false) {
+        list_->insert(queue_->getFront());
+        queue_->pop();
         if (list_->size() >= kMaxActiveListSize) {
             set_->AppendFrozenList(list_, config_->writerId);
             list_ = new SkipList();
