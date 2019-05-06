@@ -2,7 +2,7 @@
 #include "utils/dbformat.h"
 #include <unistd.h>
 #include <bits/stdc++.h>
-using namespace leveldb;
+using namespace yangkv;
 using namespace std;
 
 map<string, string>mp;
@@ -113,8 +113,8 @@ void CMD() {
 }
 
 int main() {
-    //CMD();
-    //return 0;
+    CMD();
+    return 0;
     //codingTEST();
     //mementryTEST();
     //return 0;

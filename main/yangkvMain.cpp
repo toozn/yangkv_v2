@@ -3,9 +3,12 @@
 #include "versionset.h"
 #include "memory/compacter.h"
 #include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include <iostream>
 
-namespace leveldb {
+namespace yangkv {
 
 std::string NullStr = "";
 
@@ -25,17 +28,32 @@ void* CompacterBegin(void* instance) {
     return nullptr;
 }
 
+int getLogID(int writerid) {
+    int fileid = 1;
+    while(access(LogFileName(fileid, writerid).c_str(), 0) == 0) {
+        fileid++;
+    }
+    return fileid;
+}
+
 void YangkvMain::init() {
     idx_ = 1;
     bg_lock_ = new CondLock();
     env_ = new Env();
     set_ = new VersionSet(this, bg_lock_);
     for (int id = 0; id < kMaxWriter; id++) {
-        
-        writer_args_[id] = new WriterConfig(id);
+        int LogID = getLogID(id);
+        writer_args_[id] = new WriterConfig(id, LogID);
         writer_[id] = new Writer(set_, writer_args_[id], env_);
         pthread_t tid;
         pthread_create(&tid, nullptr, WriterBegin, (void*)writer_[id]);
+    }
+    for (int i = 0; i < kMaxWriter; i++) {
+        auto queue = writer_[i]->queue_;
+        while(queue->ready() == false) {
+            usleep(5000);
+        }
+        idx_ = std::max((uint64_t)idx_, queue->maxid() + 1);
     }
     {
         compacter_args_ = new CompacterConfig();
@@ -43,7 +61,6 @@ void YangkvMain::init() {
         pthread_t tid;
         pthread_create(&tid, nullptr, CompacterBegin, (void*)compacter_);
     }
-
     sleep(1);
 }
 

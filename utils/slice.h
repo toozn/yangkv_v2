@@ -6,7 +6,7 @@
 #include <iostream>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 class Slice {
  public:

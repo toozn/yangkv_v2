@@ -1,16 +1,13 @@
-// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#ifndef STORAGE_LEVELDB_DB_LOG_WRITER_H_
-#define STORAGE_LEVELDB_DB_LOG_WRITER_H_
+#ifndef STORAGE_yangkv_DB_LOG_WRITER_H_
+#define STORAGE_yangkv_DB_LOG_WRITER_H_
 
 #include <stdint.h>
 #include "dbformat.h"
 #include "slice.h"
 #include "status.h"
 
-namespace leveldb {
+namespace yangkv {
 
 class WritableFile;
 
@@ -40,6 +37,6 @@ class Writer {
 };
 
 }  // namespace log
-}  // namespace leveldb
+}  // namespace yangkv
 
-#endif  // STORAGE_LEVELDB_DB_LOG_WRITER_H_
+#endif  // STORAGE_yangkv_DB_LOG_WRITER_H_

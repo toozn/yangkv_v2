@@ -1,10 +1,11 @@
 #include "env.h"
 
-namespace leveldb {
+namespace yangkv {
 Status Env::NewRandomAccessFile(const std::string& filename,
                              RandomAccessFile** result) {
     *result = nullptr;
     int fd = ::open(filename.c_str(), O_RDONLY);
+    assert(fd >= 0);
     if (fd < 0) {
       return Status::Error();
     }
@@ -50,7 +51,14 @@ Status Env::NewWritableFile(const std::string& filename,
 
   RandomAccessFile::~RandomAccessFile() {
   }
-
+  Status RandomAccessFile::ReadSize(uint64_t offset, size_t* result,
+              char* scratch) const {
+    int fd = fd_;
+    assert(fd != -1);
+    ssize_t read_size = ::pread(fd, scratch, sizeof(size_t), static_cast<off_t>(offset));
+    memcpy(result, scratch, sizeof(size_t));
+    return Status::OK();
+  }
   Status RandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const {
     int fd = fd_;
@@ -76,7 +84,11 @@ Status Env::NewWritableFile(const std::string& filename,
       Close();
     }
   }
-
+  Status WritableFile::AppendSize(const size_t& value) {
+    std::memcpy(buf_ + pos_, &value, sizeof(value));
+    pos_ += sizeof(value);
+    return Status::OK();
+  }
   Status WritableFile::Append(const Slice& data) {
     size_t write_size = data.size();
     const char* write_data = data.data();

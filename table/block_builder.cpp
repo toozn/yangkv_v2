@@ -6,7 +6,7 @@
 #include "format.h"
 #include "block.h"
 
-namespace leveldb {
+namespace yangkv {
 
 BlockBuilder::BlockBuilder(const Options* options)
     : options_(options),
@@ -78,4 +78,4 @@ void BlockBuilder::Add(const Slice& key, const Slice& value) {
   counter_++;
 }
 
-}  // namespace leveldb
+}  // namespace yangkv

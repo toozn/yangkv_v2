@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 class VersionSet;
 class YangkvMain;
 class CondLock;

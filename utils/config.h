@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 class Compacter;
 class Writer;
@@ -15,12 +15,14 @@ public:
 class WriterConfig{
 public:
     WriterConfig(){}
-    WriterConfig(int id) {
+    WriterConfig(int writerid, int logid) {
         stopFLAG = false;
-        writerId = id;
+        writerID = writerid;
+        logID = logid;
     }
     bool stopFLAG;
-    int writerId;
+    int writerID;
+    int logID;
 };
 
 class CompacterConfig{

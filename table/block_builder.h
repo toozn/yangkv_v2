@@ -3,7 +3,7 @@
 #include "utils/slice.h"
 #include "utils/option.h"
 #pragma once
-namespace leveldb {
+namespace yangkv {
 
 
 class BlockBuilder {
@@ -44,4 +44,4 @@ class BlockBuilder {
   void operator=(const BlockBuilder&);
 };
 
-}  // namespace leveldb
+}  // namespace yangkv

@@ -6,6 +6,7 @@ cc_library(
     deps = ["//utils:dbformat",
             "//utils:env",
             "//utils:logwriter",
+            "//utils:logreader",
             "//utils:filename"],
     visibility = ["//main:__pkg__"],
 )

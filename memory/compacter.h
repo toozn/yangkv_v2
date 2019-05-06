@@ -6,7 +6,7 @@
 #pragma once
 
 
-namespace leveldb {
+namespace yangkv {
 
 class YangkvMain;
 class VersionSet;

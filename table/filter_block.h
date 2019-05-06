@@ -2,10 +2,10 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include "leveldb/slice.h"
+#include "yangkv/slice.h"
 #include "util/hash.h"
 #pragma once
-namespace leveldb {
+namespace yangkv {
 
 class Slice;
 
@@ -50,7 +50,7 @@ class FilterPolicy {
 // ignores trailing spaces, it would be incorrect to use a
 // FilterPolicy (like NewBloomFilterPolicy) that does not ignore
 // trailing spaces in keys.
-LEVELDB_EXPORT const FilterPolicy* NewBloomFilterPolicy(int bits_per_key);
+yangkv_EXPORT const FilterPolicy* NewBloomFilterPolicy(int bits_per_key);
 
 // A FilterBlockBuilder is used to construct all of the filters for a
 // particular Table.  It generates a single string which is stored as

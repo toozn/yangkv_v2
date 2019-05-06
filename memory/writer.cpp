@@ -3,12 +3,12 @@
 #include "utils/config.h"
 #include <unistd.h>
 
-namespace leveldb {
+namespace yangkv {
 
 class VersionSet;
 
 void Writer::workRound() {
-    int id = config_->writerId;
+    int id = config_->writerID;
     printf("Writer%d begin to work\n", id);
     while (config_->stopFLAG == false) {
         mayInsertMessage();
@@ -21,13 +21,14 @@ Writer::Writer(VersionSet* set, WriterConfig* config, Env* env) {
     env_ = env;
     config_ = config;
     list_ = new SkipList();
-    queue_ = new MessageQueue(config_->writerId, env_);
+    queue_ = new MessageQueue(config_->writerID, config_->logID, env_);
     pthread_rwlock_init(&rwlock_, NULL);
 }
 
 Writer::~Writer() {
     delete list_;
     delete queue_;
+    delete config_;
 }
 
 void Writer::mayInsertMessage() {
@@ -36,7 +37,7 @@ void Writer::mayInsertMessage() {
         list_->insert(queue_->getFront());
         queue_->pop();
         if (list_->size() >= kMaxActiveListSize) {
-            set_->AppendFrozenList(list_, config_->writerId);
+            set_->AppendFrozenList(list_, config_->writerID);
             list_ = new SkipList();
         }
     }

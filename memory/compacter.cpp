@@ -3,7 +3,7 @@
 #include "main/versionset.h"
 #include <unistd.h>
 
-namespace leveldb {
+namespace yangkv {
 
 void Compacter::workRound() {
     printf("Compacter begin to work!\n");

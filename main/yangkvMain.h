@@ -8,7 +8,7 @@
 #include <atomic>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 class Writer;
 class Compacter;

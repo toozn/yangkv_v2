@@ -1,12 +1,12 @@
 #include "slice.h"
 #pragma once
-namespace leveldb {
+namespace yangkv {
 class Comparator{
  public:
   Comparator() { }
   ~Comparator() { }
   const char* Name() const {
-    return "leveldb.BytewiseComparator";
+    return "yangkv.BytewiseComparator";
   }
   int Compare(const Slice& a, const Slice& b) const {
     return a.compare(b);

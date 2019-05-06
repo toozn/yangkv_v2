@@ -7,7 +7,7 @@
 #include "table/table_builder.h"
 #include <map>
 
-namespace leveldb {
+namespace yangkv {
 
 class MergeIterator {
 public:

@@ -6,7 +6,7 @@
 #include "utils/env.h"
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 class VersionSet;
 class Compacter;

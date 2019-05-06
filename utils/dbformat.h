@@ -3,7 +3,7 @@
 #include <iostream>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 struct MemEntry {
 	Slice key;

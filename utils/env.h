@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 static const int kSeedForWriter = 37;
 static const int kQueueSizeToWriter = 32;
 static const int kQueueSizeToCompacter = 16;
@@ -25,6 +25,7 @@ static const size_t kWritableFileBufferSize = 65536;
 static const int kDeleted = 1;
 static const uint64_t kTableMagicNumber = 0xdb4775248b80fb57ull;
 static const size_t kBlockTrailerSize = 5;
+static const int kMaxRecordSize = 100000;
 enum CompressionType {
   kNoCompression     = 0x0,
   kSnappyCompression = 0x1
@@ -38,10 +39,15 @@ class RandomAccessFile {
   RandomAccessFile(std::string filename, int fd);
 
   ~RandomAccessFile();
-
+  Status ReadSize(uint64_t offset, size_t* result,
+              char* scratch) const;
   Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const;
-
+  size_t FileSize() {
+    struct stat statbuf;  
+    stat(filename_.c_str(), &statbuf);  
+    return statbuf.st_size; 
+  }
  private:
   const int fd_;  // -1 if has_permanent_fd_ is false.
   //Limiter* const fd_limiter_;
@@ -53,7 +59,7 @@ class WritableFile{
   WritableFile(std::string filename, int fd);
 
   ~WritableFile();
-
+  Status AppendSize(const size_t& data);
   Status Append(const Slice& data);
 
   Status Close() ;

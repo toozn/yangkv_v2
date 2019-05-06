@@ -1,7 +1,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #pragma once
-namespace leveldb{
+namespace yangkv{
 
 class CondLock {
 public:

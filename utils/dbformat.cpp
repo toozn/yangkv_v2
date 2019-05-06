@@ -1,7 +1,7 @@
 #include "dbformat.h"
 #include <iostream>
 
-namespace leveldb {
+namespace yangkv {
 Status DecodeMemEntry(Slice& s, MemEntry& entry) {
 	uint32_t klength, vlength;
 	const char* ptr = s.data();

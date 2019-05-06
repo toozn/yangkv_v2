@@ -74,6 +74,17 @@ cc_library(
     visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 
+cc_library(
+    name = "logreader",
+    srcs = ["logreader.cpp"],
+    hdrs = ["logreader.h"],
+    deps = [":status",
+            ":slice",
+            ":env",
+            ":dbformat",],
+    visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
+)
+
 
 cc_library(
     name = "env",

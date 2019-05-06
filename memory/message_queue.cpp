@@ -1,27 +1,50 @@
 #include "message_queue.h"
+#include "utils/logreader.h"
 #include "utils/dbformat.h"
 #include "utils/env.h"
 #include <unistd.h>
 #include <iostream>
+#include <math.h>
 #pragma once
-namespace leveldb {
+namespace yangkv {
 
 std::string LogFileName(uint64_t file_number, uint32_t writer_number) {
     return "yang_log_writer_" + std::to_string(writer_number)
      + "_" + std::to_string(file_number);
 }
 
-MessageQueue::MessageQueue(uint32_t writerid, Env* env) {
+MessageQueue::MessageQueue(uint32_t writerID, int logID, Env* env) {
+    ready_ = false;
 	w_ptr = 1;
 	r_ptr = 1;
-    logid_ = 1;
+    logid_ = logID;
     env_ = env;
     logfile_ = nullptr;
-    writerid_ = writerid;
+    max_id_ = 0;
+    writerid_ = writerID;
     Status s = env_->NewWritableFile(
         LogFileName(logid_, writerid_), &logfile_);
     assert(logfile_ != nullptr);
     log_ = new log::Writer(logfile_);
+    for (int i = 1; i < logid_; i++) {
+        RandomAccessFile* oldlog = nullptr;
+        Status s = env_->NewRandomAccessFile(
+        LogFileName(i, writerid_), &oldlog);
+        assert(oldlog != nullptr);
+        auto reader = new log::Reader(oldlog);
+        MemEntry entry;
+        while(!reader->end()) {
+            s = reader->ReadRecord(entry);
+            entry.Debug();
+            max_id_ = std::max(max_id_, entry.seq_num);
+            push(entry);
+        }
+    }
+    ready_ = true;
+}
+
+bool MessageQueue::ready() {
+    return ready_;
 }
 
 MessageQueue::~MessageQueue() {
@@ -29,7 +52,7 @@ MessageQueue::~MessageQueue() {
 
 void MessageQueue::push(MemEntry entry) {
 	std::lock_guard<std::mutex> lock(lock_);
-    Status s = log_->AddRecord(entry);
+    if(ready_) Status s = log_->AddRecord(entry);
     while(isFull()) usleep(5);
 	queue_[w_ptr % kQueueSize] = entry;
 	w_ptr++;

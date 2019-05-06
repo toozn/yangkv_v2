@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #pragma once
-namespace leveldb{
+namespace yangkv{
 
 class BlockContents;
 class Block {

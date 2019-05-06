@@ -2,7 +2,7 @@
 #include "format.h"
 #include "utils/dbformat.h"
 
-namespace leveldb {
+namespace yangkv {
 
 inline uint32_t Block::NumRestarts() const {
   assert(size_ >= sizeof(uint32_t));

@@ -2,7 +2,7 @@
 #include "env.h"
 #include "comparator.h"
 #pragma once
-namespace leveldb {
+namespace yangkv {
 
 class Comparator;
 class Env;
@@ -73,7 +73,7 @@ public:
   // a block is the unit of reading from disk).
 
   // If non-null, use the specified cache for blocks.
-  // If null, leveldb will automatically create and use an 8MB internal cache.
+  // If null, yangkv will automatically create and use an 8MB internal cache.
   // Default: nullptr
   //Cache* block_cache;
 
@@ -92,7 +92,7 @@ public:
   // Default: 16
   int block_restart_interval;
 
-  // Leveldb will write up to this amount of bytes to a file before
+  // yangkv will write up to this amount of bytes to a file before
   // switching to a new one.
   // Most clients should leave this parameter alone.  However if your
   // filesystem is more efficient with larger files, you could

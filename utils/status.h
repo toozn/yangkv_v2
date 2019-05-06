@@ -2,7 +2,7 @@
 #include <string>
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 
 static const std::string sNotFound = "NotFound";
 static const std::string sError = "Error";

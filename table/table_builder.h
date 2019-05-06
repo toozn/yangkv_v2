@@ -4,7 +4,7 @@
 #include "utils/option.h"
 #pragma once
 
-namespace leveldb {
+namespace yangkv {
 class BlockBuilder;
 class BlockHandle;
 class WritableFile;
@@ -72,4 +72,4 @@ class TableBuilder {
   Rep* rep_;
 };
 
-}  // namespace leveldb
+}  // namespace yangkv

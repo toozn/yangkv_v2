@@ -1,7 +1,7 @@
 #include "format.h"
 #include "utils/dbformat.h"
 #include "utils/env.h"
-namespace leveldb {
+namespace yangkv {
 
 void BlockHandle::EncodeTo(std::string* dst) const {
   // Sanity check that all fields have been set
@@ -102,4 +102,4 @@ Status ReadBlock(RandomAccessFile* file,
   return Status::OK();
 }
 
-}  // namespace leveldb
+}  // namespace yangkv
