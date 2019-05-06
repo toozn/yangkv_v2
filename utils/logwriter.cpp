@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "utils/env.h"
 #include "utils/dbformat.h"
+#include "main/versionedit.h"
 
 namespace yangkv {
 namespace log {
@@ -19,7 +20,6 @@ Writer::~Writer() {
 
 Status Writer::AddRecord(MemEntry& entry) {
   Slice slice;
-  entry.Debug();
   EncodeMemEntry(entry, slice);
   size_t sz = slice.size();
   Status s = dest_->AppendSize(sz);
@@ -29,5 +29,10 @@ Status Writer::AddRecord(MemEntry& entry) {
   assert(s.ok());
   return Status::OK();
 }
+
+Status Writer::AddVersionEdit(VersionEdit* v) {
+
+}
+
 }  // namespace log
 }  // namespace yangkv

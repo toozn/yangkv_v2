@@ -10,6 +10,7 @@
 namespace yangkv {
 
 class WritableFile;
+class VersionEdit; 
 
 namespace log {
 
@@ -27,6 +28,7 @@ class Writer {
   ~Writer();
 
   Status AddRecord(MemEntry& entry);
+  Status AddVersionEdit(VersionEdit* edit);
 
  private:
   WritableFile* dest_;

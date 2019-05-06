@@ -22,7 +22,29 @@ void Version::Unref(){
     }
 }
 
+Version::~Version() {
+    for (int i = 0; i < kMaxLevel; i++) {
+        for (auto file: files_[i]) {
+            file->unref();
+        }
+    }
+}
+
 Status Version::apply(Version* curr, VersionEdit* edit) {
+    for (int i = 0; i < kMaxLevel; i++) {
+      files_[i] = curr->GetFileList(i);
+    }
+    for (auto it: edit->new_files_) {
+        int level = it.first;
+        if (level == 0) {
+          files_[level].push_back(it.second);
+        }
+    }
+    for (int i = 0; i < kMaxLevel; i++) {
+        for (auto file: files_[i]) {
+            file->ref();
+        }
+    }
     return Status::OK();
 }
 
@@ -73,11 +95,19 @@ bool Version::Get(std::string& key, uint64_t seq, std::string* value) {
     return false;
 }
 
-void Version::Debug() {
+void Version::debug() {
     printf("-----------------------\n");
     printf("ref: %d\n", ref_);
+    printf("frozen list:\n");
     for (int i = 0; i < kMaxWriter; i++) {
-        printf("%d\n", (int)list_[i].size());
+        printf("writer:%d size:%d\n", i, (int)list_[i].size());
+    }
+    printf("sstable:\n");
+    for (int i = 0; i < kMaxLevel; i++) {
+        for(auto meta: files_[i]) {
+            printf("Level %d, ", i);
+            meta->debug();
+        }
     }
     printf("-----------------------\n");
 }
@@ -88,7 +118,7 @@ private:
     struct BySmallestKey {
 
     bool operator()(FileMetaData* f1, FileMetaData* f2) const {
-        int r = f1->smallest < f2->smallest;
+        int r = f1->smallest.key.compare(f2->smallest.key);
         if (r != 0) {
           return (r < 0);
         } else {
@@ -160,7 +190,7 @@ private:
     // Add new files
     for (size_t i = 0; i < edit->new_files_.size(); i++) {
       const int level = edit->new_files_[i].first;
-      FileMetaData* f = new FileMetaData(edit->new_files_[i].second);
+      FileMetaData* f = new FileMetaData(*edit->new_files_[i].second);
       f->refs = 1;
       f->allowed_seeks = static_cast<int>((f->file_size / 16384U));
       if (f->allowed_seeks < 100) f->allowed_seeks = 100;
@@ -209,7 +239,8 @@ private:
         std::vector<FileMetaData*>* files = &v->files_[level];
         if (level > 0 && !files->empty()) {
           // Must not overlap
-          assert((*files)[files->size()-1]->largest < f->smallest);
+          assert((*files)[files->size()-1]->largest.key
+                .compare(f->smallest.key) < 0);
         }
         f->refs++;
         files->push_back(f);

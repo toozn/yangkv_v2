@@ -35,7 +35,6 @@ MessageQueue::MessageQueue(uint32_t writerID, int logID, Env* env) {
         MemEntry entry;
         while(!reader->end()) {
             s = reader->ReadRecord(entry);
-            entry.Debug();
             max_id_ = std::max(max_id_, entry.seq_num);
             push(entry);
         }

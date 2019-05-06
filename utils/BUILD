@@ -70,7 +70,8 @@ cc_library(
     hdrs = ["logwriter.h"],
     deps = [":status",
             ":slice",
-            ":dbformat",],
+            ":dbformat",
+            "//main:versionedit",],
     visibility = ["//main:__pkg__", "//memory:__pkg__", "//table:__pkg__"],
 )
 

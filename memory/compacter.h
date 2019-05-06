@@ -28,6 +28,7 @@ public:
         inCompact_ = false;
     }
     ~Compacter(){}
+    Status compact(VersionEdit* edit);
     void workRound();
     bool inCompact() {return inCompact_;}
     VersionEdit* calEdit();

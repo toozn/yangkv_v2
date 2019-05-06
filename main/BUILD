@@ -22,7 +22,9 @@ cc_library(
     srcs = ["versionedit.cpp"],
     hdrs = ["versionedit.h"],
     deps = ["//memory:skiplist",
-            "//utils:env",],
+            "//utils:env",
+            "//utils:dbformat",],
+    visibility = ["//utils:__pkg__"],
 )
 cc_library(
     name = "versionset",

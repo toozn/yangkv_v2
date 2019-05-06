@@ -113,8 +113,8 @@ void CMD() {
 }
 
 int main() {
-    CMD();
-    return 0;
+    //CMD();
+    //return 0;
     //codingTEST();
     //mementryTEST();
     //return 0;

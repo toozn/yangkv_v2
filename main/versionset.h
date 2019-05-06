@@ -20,12 +20,16 @@ public:
         list_count_ = 0;
         pthread_rwlock_init(&rwlock_, NULL);
     }
+    ~Version();
     void Ref();
     void Unref();
     bool Get(std::string& key, uint64_t seq, std::string* value);
     bool isFull() {return list_count_ >= kMaxFrozenList;}
     void AppendList(SkipList* list, int idx);
-    void Debug();
+    void debug();
+    std::vector<FileMetaData*> GetFileList(int level) {
+        return files_[level];
+    }
     Status apply(Version* curr, VersionEdit* edit);
     Version* next_;
     Version* prev_;

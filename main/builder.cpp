@@ -32,6 +32,13 @@ public:
 	bool End() {
 		return mg_it == mp_.end();
 	}
+	void setMetaData(FileMetaData* meta) {
+		MemEntry entry;
+		DecodeMemEntry(mp_.begin()->second, entry);
+		meta->smallest = entry;
+		DecodeMemEntry(mp_.rbegin()->second, entry);
+		meta->largest = entry;
+	}
 	void Debug() {
 		for (auto it: mp_) {
 			MemEntry entry;
@@ -50,11 +57,12 @@ Status BuildTable(std::vector<SkipList*>* frozenlists, Env* env,
 	assert(frozenlists != nullptr);
 	meta->file_size = 0;
 	std::string fname = TableFileName(meta->number);
-	WritableFile* file;
+	WritableFile* file = nullptr;
     Status s = env->NewWritableFile(fname, &file);
     Options opt = Options();
 	TableBuilder* builder = new TableBuilder(opt, file);
 	MergeIterator iter(frozenlists);
+	iter.setMetaData(meta);
 	while(!iter.End()) {
 		MemEntry entry;
 		DecodeMemEntry(iter.GetNext(), entry);
